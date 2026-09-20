@@ -84,18 +84,18 @@ th:100%;height:auto;position:absolute;inset:0}
   .tutorial-kicker{font-size:11px;font-weight:900;letter-spacing:.18em;color:#72a9ff}
   .tutorial-progress{font-size:12px;color:#aeb8c7}
   .tutorial-stage{position:relative;flex:1;min-height:0;margin:12px 0;border:1px solid #26303e;border-radius:24px;overflow:hidden;background:radial-gradient(circle at 50% 42%,#121b2a,#05070b 72%);box-shadow:0 24px 80px rgba(0,0,0,.5)}
-  #tutorial3d{position:absolute;inset:0;width:100%;height:100%}
-  .tutorial-caption{position:absolute;left:0;right:0;bottom:0;padding:20px 22px 22px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.82) 28%)}
+  #tutorial3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none;background:transparent;opacity:1;visibility:visible}
+  .tutorial-caption{position:absolute;z-index:3;left:0;right:0;bottom:0;padding:20px 22px 22px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.82) 28%)}
   .tutorial-action{font-size:clamp(28px,5vw,52px);font-weight:950;letter-spacing:-.03em;margin:0 0 8px}
   .tutorial-desc{max-width:760px;color:#c5cedb;font-size:14px;line-height:1.7}
   .tutorial-model-file{margin-top:7px;font-size:11px;color:#7f8da2}
-  .tutorial-status{position:absolute;top:16px;left:16px;padding:8px 11px;border-radius:999px;background:rgba(6,9,14,.75);border:1px solid #2a3544;color:#bcd2f2;font-size:11px;backdrop-filter:blur(6px)}
+  .tutorial-status{position:absolute;z-index:4;top:16px;left:16px;padding:8px 11px;border-radius:999px;background:rgba(6,9,14,.75);border:1px solid #2a3544;color:#bcd2f2;font-size:11px;backdrop-filter:blur(6px)}
   .tutorial-controls{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .tutorial-controls-left,.tutorial-controls-right{display:flex;gap:10px}
   .tutorial-controls button{min-width:110px}
   .tutorial-controls .primary{min-width:170px}
   .tutorial-note{font-size:11px;color:#77859a}
-  .tutorial-arrow{position:absolute;left:50%;top:47%;width:120px;height:220px;transform:translate(-50%,-50%);opacity:.9;pointer-events:none;display:none}
+  .tutorial-arrow{z-index:4;position:absolute;left:50%;top:47%;width:120px;height:220px;transform:translate(-50%,-50%);opacity:.9;pointer-events:none;display:none}
   .tutorial-arrow.show{display:block}
   .tutorial-arrow::before{content:"";position:absolute;left:50%;top:36px;bottom:0;width:14px;transform:translateX(-50%);border-radius:20px;background:linear-gradient(180deg,#ffde65,#ff8d4d)}
   .tutorial-arrow::after{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:52px solid #ffde65;filter:drop-shadow(0 0 14px rgba(255,204,86,.35))}
@@ -840,6 +840,9 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorial3DRenderer.outputColorSpace = THREE.SRGBColorSpace;
     tutorial3DRenderer.toneMapping = THREE.ACESFilmicToneMapping;
     tutorial3DRenderer.toneMappingExposure = 1.12;
+    tutorial3DRenderer.autoClear = true;
+    tutorial3DRenderer.sortObjects = true;
+    tutorial3DRenderer.setClearColor(0x070b12, 1);
     tutorial3DRenderer.shadowMap.enabled = true;
     tutorial3DRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
     tutorial3DScene.add(new THREE.HemisphereLight(0xb8cdf0,0x10131b,2.2));
@@ -895,22 +898,23 @@ th:100%;height:auto;position:absolute;inset:0}
       // チュートリアル用のシンプルな材質へ置き換えてモデル自体を確実に見せる。
       const mats=Array.isArray(o.material)?o.material:[o.material];
       o.material=mats.map(m=>{
-        if(!m) return new THREE.MeshStandardMaterial({color:0xd7deea,roughness:.72,metalness:.05});
-        const color=(m.color && m.color.isColor)?m.color.clone():new THREE.Color(0xd7deea);
-        if(color.r+color.g+color.b < 0.10) color.setHex(0xaeb9c9);
-        const nm=new THREE.MeshStandardMaterial({
+        const color=(m?.color && m.color.isColor)?m.color.clone():new THREE.Color(0x66b7ff);
+        // Safari/iPad tutorial fail-safe: use an unlit material so lighting, tone mapping,
+        // missing textures and FBX material conversion cannot make a valid mesh visually disappear.
+        if(color.r+color.g+color.b < 0.10) color.setHex(0x66b7ff);
+        return new THREE.MeshBasicMaterial({
           color,
-          roughness:typeof m.roughness==='number'?Math.max(.45,Math.min(1,m.roughness)):.72,
-          metalness:typeof m.metalness==='number'?Math.min(.2,m.metalness):.03,
-          map:m.map||null,
+          map:null,
           transparent:false,
           opacity:1,
-          side:THREE.DoubleSide
+          side:THREE.DoubleSide,
+          depthTest:true,
+          depthWrite:true
         });
-        return nm;
       });
       o.frustumCulled=false;
-      o.castShadow=true; o.receiveShadow=true;
+      o.renderOrder=10;
+      o.castShadow=false; o.receiveShadow=false;
     });
   }
 
@@ -991,7 +995,7 @@ th:100%;height:auto;position:absolute;inset:0}
       diag.modelLoad.end=performance.now(); diag.modelLoad.duration=diag.modelLoad.end-diag.modelLoad.start; diag.modelLoad.status='loaded'; diag.modelLoad.url=new URL(step.file,document.baseURI).href;
       diagPush('ok','FBX','FBXLoader load callback 成功',{file:step.file,duration:diag.modelLoad.duration,animations:model.animations?.length||0});
       prepareTutorialModel(model);
-      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true; if(o.material){o.material.side=THREE.FrontSide;}}});
+      model.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false; if(o.material){o.material.side=THREE.DoubleSide;o.material.depthTest=true;o.material.depthWrite=true;o.renderOrder=10;}}});
       tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial(); resizeModelTutorial(); diagPush('info','MODEL','FBX配置後監査',diagModelInfo()); diagPush('info','CAMERA','配置後NDC監査',diagProjection());
       setTimeout(()=>{ if(els.diagPanel?.classList.contains('show')) runDeepDiagnostic().catch(e=>diagPush('error','DIAG',String(e))); },300);
       if(Array.isArray(model.animations)&&model.animations.length){
@@ -1070,7 +1074,15 @@ th:100%;height:auto;position:absolute;inset:0}
       tutorial3DModel.children.forEach((c,i)=>{if(i===2||i===3)c.position.y += Math.sin(t*2.2+i)*0.012;});
     }
     if(tutorial3DModel && !tutorial3DModel.userData?.upperGuide){tutorial3DModel.rotation.y += dt*0.22;}
+    if(tutorial3DModel){tutorial3DModel.visible=true; tutorial3DModel.updateMatrixWorld(true);}
+    tutorial3DCamera.updateMatrixWorld(true);
+    tutorial3DRenderer.clear(true,true,true);
     tutorial3DRenderer.render(tutorial3DScene,tutorial3DCamera);
+    if(tutorial3DModel && !tutorial3DModel.userData?.upperGuide && diag.rafCount===30){
+      const box=new THREE.Box3().setFromObject(tutorial3DModel);
+      const size=box.getSize(new THREE.Vector3());
+      diagPush('ok','VISUAL','可視化フェイルセーフ描画実行',{modelVisible:tutorial3DModel.visible,size:size.toArray().map(v=>+v.toFixed(3)),canvas:[els.tutorial3d?.clientWidth,els.tutorial3d?.clientHeight],material:'MeshBasicMaterial'});
+    }
     if(diag.rafCount%90===0){
       try{
         const gl=tutorial3DRenderer.getContext();
