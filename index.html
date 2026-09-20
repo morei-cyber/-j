@@ -264,6 +264,8 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorialPrev: document.getElementById("tutorialPrev"),
     tutorialNext: document.getElementById("tutorialNext"),
     tutorialReplay: document.getElementById("tutorialReplay"),
+    tutorialChooseFile: document.getElementById("tutorialChooseFile"),
+    tutorialFileInput: document.getElementById("tutorialFileInput"),
     tutorialPractice: document.getElementById("tutorialPractice"),
     tutorialClose: document.getElementById("tutorialClose"),
     tutorialUpperArrow: document.getElementById("tutorialUpperArrow")
@@ -451,6 +453,61 @@ th:100%;height:auto;position:absolute;inset:0}
     return group;
   }
 
+  function tutorialErrorText(e){
+    if(e==null) return '不明なエラー';
+    const parts=[];
+    try{ if(e.name) parts.push(String(e.name)); }catch(_e){}
+    try{ if(e.message) parts.push(String(e.message)); }catch(_e){}
+    try{ if(e.status) parts.push(`status=${e.status}`); }catch(_e){}
+    try{ if(e.stack && !parts.some(x=>String(e.stack).includes(x))) parts.push(String(e.stack).split('\n').slice(0,4).join('\n')); }catch(_e){}
+    if(!parts.length){
+      try{ parts.push(Object.prototype.toString.call(e)); }catch(_e){ parts.push(String(e)); }
+    }
+    return parts.join(' | ');
+  }
+
+  function hexPreview(buffer){
+    try{
+      const u8=new Uint8Array(buffer,0,Math.min(32,buffer.byteLength));
+      return Array.from(u8).map(v=>v.toString(16).padStart(2,'0')).join(' ');
+    }catch(_e){ return '取得失敗'; }
+  }
+
+  async function fetchFBXArrayBuffer(fileName){
+    const url=new URL(`./${fileName}`,location.href).href;
+    els.tutorialStatus.textContent=`${fileName} を取得中…`;
+    let response;
+    try{
+      response=await fetch(url,{cache:'no-store',credentials:'same-origin'});
+    }catch(e){
+      const detail=`通信エラー\nURL: ${url}\n${tutorialErrorText(e)}`;
+      els.tutorialStatus.textContent='FBX通信エラー';
+      throw new Error(detail);
+    }
+    if(!response.ok){
+      const ct=response.headers.get('content-type')||'不明';
+      throw new Error(`HTTP ${response.status} ${response.statusText||''}\nURL: ${url}\nContent-Type: ${ct}`.trim());
+    }
+    const buffer=await response.arrayBuffer();
+    if(buffer.byteLength<16){
+      throw new Error(`FBXが小さすぎます: ${buffer.byteLength} bytes\nURL: ${url}`);
+    }
+    const u8=new Uint8Array(buffer,0,Math.min(32,buffer.byteLength));
+    const ascii=new TextDecoder('latin1').decode(u8);
+    console.log(`[TUTORIAL FBX] ${fileName}: bytes=${buffer.byteLength.toLocaleString()} url=${url}`);
+    console.log(`[TUTORIAL FBX] header=${JSON.stringify(ascii)} hex=${hexPreview(buffer)}`);
+    return {buffer,url};
+  }
+
+  async function parseTutorialFileBuffer(fileName, buffer, resourcePath=''){
+    // ここは動作確認済みViewerと同じ系統：ArrayBufferを直接FBXLoader.parse()へ渡す。
+    const loader=new FBXLoader();
+    const model=loader.parse(buffer,resourcePath||'');
+    if(!model) throw new Error('FBXLoader.parse() がモデルを返しませんでした。');
+    console.log(`[TUTORIAL FBX] parse OK: ${fileName} meshes=${model.children?.length||0} animations=${model.animations?.length||0}`);
+    return model;
+  }
+
   async function loadTutorialStep(index){
     tutorialIndex=Math.max(0,Math.min(MODEL_TUTORIALS.length-1,index));
     const step=MODEL_TUTORIALS[tutorialIndex];
@@ -462,88 +519,72 @@ th:100%;height:auto;position:absolute;inset:0}
     els.tutorialPrev.disabled=tutorialIndex===0;
     els.tutorialNext.disabled=tutorialIndex===MODEL_TUTORIALS.length-1;
     els.tutorialPractice.textContent=tutorialIndex===MODEL_TUTORIALS.length-1?'手本を見終えた → パンチ学習へ':'最後まで見る → パンチ学習へ';
-
     tutorial3DRequest++;
     const req=tutorial3DRequest;
     clearTimeout(tutorialAutoTimer);
     clearTutorialModel();
+    if(els.tutorialChooseFile) els.tutorialChooseFile.style.display=step.kind==='upper'?'none':'inline-block';
 
     if(step.kind==='upper'){
       const g=createUppercutGuide();
       tutorial3DModel=g;
       tutorial3DScene.add(g);
       fitTutorialModel(g);
-      resizeModelTutorial();
       els.tutorialStatus.textContent='アッパー：3D手本FBXは未指定。動きの方向を表示しています';
       return;
     }
 
-    els.tutorialStatus.textContent=`${step.file} をArrayBufferとして読み込み中…`;
-
-    try{
-      const loader=new FBXLoader();
-      let lastError=null;
-      let loadedBuffer=null;
-      let loadedFileName=step.file;
-
-      // 参考の動作確認済みViewerと同じ方式：
-      // URLをFBXLoader.load()へ直接渡さず、fetch→ArrayBuffer→FBXLoader.parse()。
-      for(const fileName of [step.file,...step.fallbacks.slice(1)]){
-        try{
-          const response=await fetch(fileName,{cache:'no-store'});
-          if(!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText||''}`.trim());
-          const buffer=await response.arrayBuffer();
-          if(buffer.byteLength<16) throw new Error(`ファイルサイズが小さすぎます: ${buffer.byteLength} bytes`);
-
-          const head=new TextDecoder('latin1').decode(new Uint8Array(buffer,0,20));
-          const binaryHeader=head.startsWith('Kaydara FBX Binary');
-          console.log(`[Tutorial FBX] ${fileName}: bytes=${buffer.byteLength.toLocaleString()} binaryHeader=${binaryHeader}`);
-          loadedBuffer=buffer;
-          loadedFileName=fileName;
-          break;
-        }catch(e){
-          lastError=e;
-        }
+    let loaded=null;
+    let lastError=null;
+    const candidates=[step.file,...(step.fallbacks||[]).slice(1)];
+    for(const fileName of candidates){
+      try{
+        const fetched=await fetchFBXArrayBuffer(fileName);
+        if(req!==tutorial3DRequest) return;
+        // fetchした実データを、そのままArrayBufferとしてparse。
+        const parsed=await parseTutorialFileBuffer(fileName,fetched.buffer,'');
+        loaded={model:parsed,fileName,url:fetched.url};
+        break;
+      }catch(e){
+        lastError=e;
+        console.error(`[TUTORIAL FBX] ${fileName} failed`,e);
       }
+    }
 
-      if(!loadedBuffer) throw lastError||new Error('FBXの取得に失敗しました。');
-      if(req!==tutorial3DRequest) return;
+    if(!loaded){
+      const msg=tutorialErrorText(lastError);
+      els.tutorialStatus.textContent=`自動読み込み失敗：${step.file}`;
+      els.tutorialDesc.textContent=`${step.desc}\n\n${msg}`;
+      if(els.tutorialChooseFile) els.tutorialChooseFile.style.display='inline-block';
+      return;
+    }
 
-      const model=loader.parse(loadedBuffer,'');
-      if(!model) throw new Error('FBXLoader.parse() がモデルを返しませんでした。');
-      if(req!==tutorial3DRequest) return;
-
-      tutorial3DModel=model;
-      prepareTutorialModel(model);
-      tutorial3DScene.add(model);
-      fitTutorialModel(model);
-      resizeModelTutorial();
-
-      if(Array.isArray(model.animations) && model.animations.length){
-        tutorial3DMixer=new THREE.AnimationMixer(model);
-        const clip=model.animations[0];
-        const action=tutorial3DMixer.clipAction(clip);
-        action.reset();
-        action.play();
-        els.tutorialStatus.textContent=`3D手本 再生中 • ${loadedFileName} • モデル表示OK`;
-      }else{
-        els.tutorialStatus.textContent=`3Dモデル読み込み完了 • ${loadedFileName} • アニメーションなし`;
+    if(req!==tutorial3DRequest) return;
+    const model=loaded.model;
+    tutorial3DModel=model;
+    prepareTutorialModel(model);
+    model.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow=true;
+        o.receiveShadow=true;
+        o.frustumCulled=false;
       }
-    }catch(e){
-      if(req!==tutorial3DRequest) return;
-      console.error(e);
+    });
+    tutorial3DScene.add(model);
+    fitTutorialModel(model);
+    resizeModelTutorial();
+    requestAnimationFrame(()=>resizeModelTutorial());
 
-      // 何が起きたかを画面上へ残す。iPad/Safariではコンソールを確認しづらいため、
-      // パス・HTTP状態・parse失敗をチュートリアル画面だけでも確認できるようにする。
-      const msg=e?.message||String(e);
-      const badge=new THREE.Mesh(
-        new THREE.CylinderGeometry(.65,.65,.18,48),
-        new THREE.MeshStandardMaterial({color:0x202938,roughness:.9})
-      );
-      badge.position.y=-.9;
-      tutorial3DScene.add(badge);
-      tutorial3DModel=badge;
-      els.tutorialStatus.textContent=`FBXを読み込めません：${step.file} / ${msg}`;
+    if(Array.isArray(model.animations)&&model.animations.length){
+      tutorial3DMixer=new THREE.AnimationMixer(model);
+      const clip=model.animations[0];
+      const action=tutorial3DMixer.clipAction(clip);
+      action.reset();
+      action.setLoop(THREE.LoopRepeat,Infinity);
+      action.play();
+      els.tutorialStatus.textContent=`3D手本 再生中 • ${loaded.fileName} • ${model.animations.length} animation • 表示OK`;
+    }else{
+      els.tutorialStatus.textContent=`3Dモデル読み込み完了 • ${loaded.fileName} • アニメーションなし`;
     }
   }
 
@@ -2120,6 +2161,46 @@ th:100%;height:auto;position:absolute;inset:0}
   els.tutorialPrev.addEventListener('click',()=>loadTutorialStep(tutorialIndex-1));
   els.tutorialNext.addEventListener('click',()=>loadTutorialStep(tutorialIndex+1));
   els.tutorialReplay.addEventListener('click',()=>loadTutorialStep(tutorialIndex));
+  if(els.tutorialChooseFile && els.tutorialFileInput){
+    els.tutorialChooseFile.addEventListener('click',()=>els.tutorialFileInput.click());
+    els.tutorialFileInput.addEventListener('change',async e=>{
+      const file=e.target.files?.[0];
+      if(!file) return;
+      const step=MODEL_TUTORIALS[tutorialIndex];
+      if(step.kind==='upper') return;
+      const req=++tutorial3DRequest;
+      clearTutorialModel();
+      try{
+        els.tutorialStatus.textContent=`選択ファイル ${file.name} をArrayBuffer解析中…`;
+        const buffer=await file.arrayBuffer();
+        if(req!==tutorial3DRequest) return;
+        const model=await parseTutorialFileBuffer(file.name,buffer,'');
+        if(req!==tutorial3DRequest) return;
+        tutorial3DModel=model;
+        prepareTutorialModel(model);
+        model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;}});
+        tutorial3DScene.add(model);
+        fitTutorialModel(model);
+        resizeModelTutorial();
+        if(model.animations?.length){
+          tutorial3DMixer=new THREE.AnimationMixer(model);
+          const action=tutorial3DMixer.clipAction(model.animations[0]);
+          action.reset();
+          action.setLoop(THREE.LoopRepeat,Infinity);
+          action.play();
+          els.tutorialStatus.textContent=`選択FBX 再生中 • ${file.name} • 表示OK`;
+        }else{
+          els.tutorialStatus.textContent=`選択FBX 読み込み完了 • ${file.name} • アニメーションなし`;
+        }
+        els.tutorialFile.textContent=file.name;
+      }catch(err){
+        console.error('[TUTORIAL FBX] local file failed',err);
+        els.tutorialStatus.textContent=`選択FBX解析失敗：${tutorialErrorText(err)}`;
+      }finally{
+        e.target.value='';
+      }
+    });
+  }
   els.tutorialPractice.addEventListener('click',()=>completeModelTutorial());
   els.tutorialClose.addEventListener('click',()=>{closeModelTutorial(); els.startScreen.style.display='flex';});
   window.addEventListener('resize',resizeModelTutorial);
