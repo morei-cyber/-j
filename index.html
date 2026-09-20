@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PUNCH ARENA - パンチアリーナ</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b0d12;color:#eef2f7;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  .wrap{max-width:1180px;margin:auto;padding:16px}
+  h1{margin:0;font-size:28px;letter-spacing:.02em}
+  .sub{color:#9da7b5;margin:5px 0 12px}
+  .start-screen{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 30%,rgba(52,120,246,.18),transparent 35%),linear-gradient(180deg,#080b11,#05070b 65%,#030407);display:flex;align-items:center;justify-content:center;padding:24px}
+  .start-panel{width:min(680px,100%);padding:34px 30px;border:1px solid #2f3948;border-radius:28px;background:rgba(10,14,21,.92);box-shadow:0 30px 100px rgba(0,0,0,.55);text-align:center}
+  .start-kicker{font-size:12px;letter-spacing:.22em;color:#6ea8ff;font-weight:800;margin-bottom:10px}
+  .start-title{font-size:clamp(42px,9vw,78px);line-height:.95;font-weight:950;letter-spacing:-.04em;margin:0}
+  .start-sub{color:#b5c0cf;font-size:15px;margin:14px auto 24px;max-width:560px;line-height:1.7}
+  .start-features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 26px;text-align:left}
+  .start-feature{padding:14px;border:1px solid #27303c;border-radius:16px;background:#0c1119}
+  .start-feature b{display:block;font-size:14px;margin-bottom:4px}.start-feature span{font-size:12px;color:#96a3b4;line-height:1.5}
+  .start-button{width:100%;font-size:18px;padding:16px 20px;border-radius:16px;background:#3478f6;box-shadow:0 10px 30px rgba(52,120,246,.22)}
+  .start-note{margin-top:12px;font-size:11px;color:#738092}
+  .stage{position:relative;border:1px solid #252c37;border-radius:20px;overflow:hidden;background:#050608;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+  video{display:block;width:100%;height:auto;transform:scaleX(-1)}
+  canvas{display:block;width:100%;height:auto;position:absolute;inset:0}
+  .hud{position:absolute;left:14px;top:14px;display:flex;gap:8px;flex-wrap:wrap;z-index:5}
+  .pill{padding:8px 12px;border:1px solid #303846;border-radius:999px;background:rgba(8,11,16,.82);font-size:12px;backdrop-filter:blur(5px)}
+  .detected{border-color:#36d98b;color:#6ff0ad}
+  .player-hud{position:absolute;left:14px;bottom:14px;min-width:210px;padding:11px 13px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(7,10,15,.78);backdrop-filter:blur(4px);z-index:5}
+  .player-name{font-weight:900;font-size:12px;letter-spacing:.12em;color:#a9b7c8;margin-bottom:6px}
+  .player-hpbar{height:9px;background:#242934;border-radius:99px;overflow:hidden}.player-hpbar>i{display:block;height:100%;width:100%;background:#f05b67;transition:width .18s}
+  .exit-btn{margin-top:8px;width:100%;padding:8px 10px;font-size:12px;background:#151b24;border:1px solid #2b3441}
+  .grid,.controls{display:none}
+  .compat-ui{display:none}
+  .battle-hud{position:absolute;right:14px;top:14px;min-width:210px;padding:11px 13px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(7,10,15,.78);backdrop-filter:blur(4px);z-index:5}
+
+th:100%;height:auto;position:absolute;inset:0}
+  .hud{position:absolute;left:14px;top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .pill{padding:8px 12px;border:1px solid #303846;border-radius:999px;background:rgba(8,11,16,.82);font-size:13px}
+  .detected{border-color:#36d98b;color:#6ff0ad}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  button{border:0;border-radius:12px;padding:12px 16px;background:#1c2330;color:#fff;font-weight:700;cursor:pointer}
+  button.primary{background:#3478f6}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .card{background:#11151d;border:1px solid #252c37;border-radius:14px;padding:14px}
+  .label{font-size:12px;color:#8f9aaa}
+  .value{font-size:25px;font-weight:800;margin-top:4px}
+  .bar{height:8px;background:#202631;border-radius:99px;overflow:hidden;margin-top:8px}
+  .bar>i{display:block;height:100%;width:0;background:#3478f6;transition:width .08s}
+  .battle-hud{position:absolute;right:14px;top:14px;min-width:190px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(7,10,15,.78);backdrop-filter:blur(4px)}
+  .battle-name{font-weight:800;font-size:15px;margin-bottom:6px;text-align:center}
+  .monster-hpbar{height:8px;background:#242934;border-radius:99px;overflow:hidden}
+  .monster-hpbar>i{display:block;height:100%;width:100%;background:#63e66d;transition:width .18s}
+.player-hpbar>i{display:block;height:100%;width:100%;background:#f05b67;transition:width .18s}
+  .battle-help{margin-top:5px;text-align:center;color:#c6ced9;font-size:11px}
+  .tips{margin-top:14px;color:#aeb7c5;font-size:13px;line-height:1.6}
+  .cal-review{display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px;background:rgba(2,4,8,.78);backdrop-filter:blur(8px)}
+  .cal-review.show{display:flex}
+  .cal-review-panel{width:min(1100px,100%);max-height:90vh;overflow:auto;background:#0f141c;border:1px solid #3b4657;border-radius:20px;padding:18px;box-shadow:0 20px 80px rgba(0,0,0,.5)}
+  .cal-review h2{margin:0 0 6px;font-size:20px}
+  .cal-review p{margin:0 0 12px;color:#aeb7c5;font-size:13px}
+  .candidate-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .candidate{position:relative;border:2px solid #2b3441;border-radius:14px;padding:8px;background:#0a0f16;cursor:pointer;transition:border-color .12s,transform .12s,background .12s}
+  .candidate:hover{transform:translateY(-1px)}
+  .candidate.selected{border-color:#4fa3ff;background:#111c2b}
+  .candidate input{position:absolute;opacity:0;pointer-events:none}
+  .candidate video{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:9px;background:#050608;transform:none}
+  .candidate .meta{display:flex;justify-content:space-between;gap:8px;margin-top:7px;font-size:11px;color:#bfc8d5}
+  .candidate .tag{font-weight:800;color:#7fd4ff}
+  .candidate-empty{padding:18px;border:1px dashed #374252;border-radius:12px;color:#9da7b5;text-align:center}
+  .candidate-placeholder{aspect-ratio:16/10;border-radius:9px;background:#151b25;border:1px dashed #3a4657;display:flex;align-items:center;justify-content:center;text-align:center;color:#9da7b5;font-size:12px;padding:10px}
+  .cal-review-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+  .cal-selected-label{font-size:12px;color:#c7d1dd}
+  @media(max-width:900px){.candidate-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:600px){.candidate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:720px){.start-features{grid-template-columns:1fr}.start-panel{padding:26px 18px}.player-hud,.battle-hud{min-width:160px;padding:9px}.hud{left:9px;top:9px}.player-hud{left:9px;bottom:9px}.battle-hud{right:9px;top:9px}}
+  @media(max-width:700px){h1{font-size:22px}}
+
+  .tutorial-screen{position:fixed;inset:0;z-index:120;background:radial-gradient(circle at 50% 20%,rgba(65,125,255,.22),transparent 40%),linear-gradient(180deg,#060910,#03050a 75%,#020306);display:none;align-items:center;justify-content:center;padding:18px}
+  .tutorial-screen.show{display:flex}
+  .tutorial-panel{width:min(1180px,100%);height:min(860px,94vh);background:rgba(7,11,18,.94);border:1px solid #2b3748;border-radius:24px;box-shadow:0 25px 100px rgba(0,0,0,.55);overflow:hidden;display:grid;grid-template-rows:auto 1fr auto}
+  .tutorial-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid #202a36}
+  .tutorial-kicker{font-size:11px;letter-spacing:.2em;color:#69a8ff;font-weight:900}.tutorial-title{font-size:22px;font-weight:900;margin-top:2px}
+  .tutorial-step{font-size:14px;color:#b9c6d6;padding:10px 13px;border:1px solid #273243;border-radius:999px;background:#0c121b}
+  .tutorial-main{position:relative;min-height:0;background:radial-gradient(circle at 50% 45%,rgba(43,77,120,.12),transparent 45%)}
+  #tutorial3D{display:block;width:100%;height:100%}
+  .tutorial-info{position:absolute;left:24px;top:24px;max-width:390px;padding:18px;border-radius:18px;background:rgba(5,8,14,.72);border:1px solid rgba(255,255,255,.11);backdrop-filter:blur(7px)}
+  .tutorial-move{font-size:30px;font-weight:950;letter-spacing:-.03em}.tutorial-desc{margin-top:8px;color:#b6c1d0;font-size:14px;line-height:1.65}
+  .tutorial-hint{margin-top:12px;color:#79c5ff;font-size:12px;font-weight:800}
+  .tutorial-progress{position:absolute;left:24px;right:24px;bottom:22px;height:7px;border-radius:99px;background:#1a222d;overflow:hidden}.tutorial-progress i{display:block;height:100%;width:0;background:#4c9cff;transition:width .1s linear}
+  .tutorial-footer{padding:14px 18px;border-top:1px solid #202a36;display:flex;justify-content:space-between;align-items:center;gap:12px}.tutorial-footer .small{font-size:12px;color:#7f8ea0}.tutorial-actions{display:flex;gap:10px}.tutorial-actions button{min-width:160px}
+  .tutorial-model-tag{margin-top:12px;font-size:11px;color:#73849a;letter-spacing:.08em}
+  @media(max-width:720px){.tutorial-panel{height:96vh}.tutorial-head{padding:14px}.tutorial-info{left:14px;top:14px;right:14px;max-width:none}.tutorial-move{font-size:24px}.tutorial-footer{flex-direction:column;align-items:stretch}.tutorial-actions{width:100%}.tutorial-actions button{flex:1}.tutorial-step{text-align:center}}
+</style>
+</head>
+<body>
+<div id="startScreen" class="start-screen">
+  <div class="start-panel">
+    <div class="start-kicker">CAMERA MOTION BATTLE</div>
+    <h1 class="start-title">PUNCH<br>ARENA</h1>
+    <div class="start-sub">パンチでモンスターを攻撃しながら、飛んでくる危険攻撃を身体を動かして回避するモーションゲーム。</div>
+    <div class="start-features">
+      <div class="start-feature"><b>🥊 パンチ</b><span>パンチの動きを最初に学習。あなたの動きに合わせて判定します。</span></div>
+      <div class="start-feature"><b>⚠ 危険攻撃</b><span>赤い予告を見て、胸の⭕を危険ラインから外してください。</span></div>
+      <div class="start-feature"><b>👾 バトル</b><span>パンチを当てて敵を倒し、次のモンスターへ進みます。</span></div>
+    </div>
+    <button id="startGame" class="start-button primary">ゲーム開始</button>
+    <div class="start-note">初回は4種類のFBX手本 → パンチ登録の順で進みます</div>
+  </div>
+</div>
+
+<div id="tutorialScreen" class="tutorial-screen">
+  <div class="tutorial-panel">
+    <div class="tutorial-head">
+      <div><div class="tutorial-kicker">PUNCH ARENA • TUTORIAL</div><div class="tutorial-title">手本の3Dモデルを見て動きを覚えよう</div></div>
+      <div id="tutorialStep" class="tutorial-step">1 / 4</div>
+    </div>
+    <div class="tutorial-main">
+      <canvas id="tutorial3D"></canvas>
+      <div class="tutorial-info">
+        <div id="tutorialMove" class="tutorial-move">左ストレート</div>
+        <div id="tutorialDesc" class="tutorial-desc">モデルが左腕を前へまっすぐ突き出します。腕の伸びと素早さをイメージしてください。</div>
+        <div id="tutorialHint" class="tutorial-hint">あなたのカメラ映像はまだ表示されません。</div>
+        <div class="tutorial-model-tag">FBX REFERENCE MODEL</div><div id="tutorialAssetStatus" class="tutorial-model-tag">FBX読み込み待機中…</div>
+      </div>
+      <div class="tutorial-progress"><i id="tutorialProgressBar"></i></div>
+    </div>
+    <div class="tutorial-footer">
+      <div id="tutorialFooterText" class="small">4種類のFBX手本を見終わったら、あなた自身のパンチ登録へ進みます。</div>
+      <div class="tutorial-actions"><button id="tutorialSkip">スキップ</button><button id="tutorialNext" class="primary">次の手本</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>PUNCH ARENA</h1>
+  <div class="sub">パンチで攻撃し、危険攻撃を身体で避ける。</div>
+
+  <div class="stage">
+    <video id="video" playsinline autoplay muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="hud">
+      <div id="status" class="pill">待機中</div>
+      <div id="poseStatus" class="pill" style="display:none">姿勢未検出</div>
+    </div>
+    <div class="battle-hud">
+      <div class="battle-name"><span id="monsterName">モンスター</span></div>
+      <div class="monster-hpbar"><i id="monsterHpBar"></i></div>
+      <div id="monsterHelp" class="battle-help">パンチで攻撃！</div>
+    </div>
+    <div class="player-hud">
+      <div class="player-name">PLAYER</div>
+      <div class="player-hpbar"><i id="playerHpBar"></i></div>
+      <button id="exitGame" class="exit-btn">ゲーム終了</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="start" class="primary">カメラ開始</button>
+    <button id="stop" disabled>停止</button>
+    <button id="calibrate" disabled style="display:none">パンチ学習</button>
+  </div>
+
+  <div id="calReview" class="cal-review">
+    <div class="cal-review-panel">
+      <h2 id="calReviewTitle">候補を選択</h2>
+      <p id="calReviewText">録画した候補を見て、この技に一番近いものを1つ選んでください。</p>
+      <div id="candidateGrid" class="candidate-grid"></div>
+      <div class="cal-review-actions">
+        <div id="calSelectedLabel" class="cal-selected-label">候補を選択してください</div>
+        <button id="calUseSelected" class="primary" disabled>この候補を採用して次へ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="compat-ui" aria-hidden="true">
+    <div id="count">0</div><div id="rightCount">0</div><div id="leftCount">0</div>
+    <div id="confidence">0%</div><div id="scoreBar"></div><div id="scoreText"></div>
+    <div id="monsterHp">100 / 100</div><div id="playerHp">100 / 100</div>
+    <div id="calibrationText">パンチ学習: 未学習</div>
+  </div>
+
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<script type="module">
+import * as THREE from "three";
+import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/FBXLoader.js";
+window.THREE = THREE;
+window.FBXLoader = FBXLoader;
+
+(() => {
+  "use strict";
+
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const els = {
+    start: document.getElementById("start"),
+    stop: document.getElementById("stop"),
+    calibrate: document.getElementById("calibrate"),
+    status: document.getElementById("status"),
+    poseStatus: document.getElementById("poseStatus"),
+    count: document.getElementById("count"),
+    rightCount: document.getElementById("rightCount"),
+    leftCount: document.getElementById("leftCount"),
+    confidence: document.getElementById("confidence"),
+    scoreBar: document.getElementById("scoreBar"),
+    scoreText: document.getElementById("scoreText"),
+    monsterHp: document.getElementById("monsterHp"),
+    monsterHpBar: document.getElementById("monsterHpBar"),
+    monsterName: document.getElementById("monsterName"),
+    monsterHelp: document.getElementById("monsterHelp"),
+    playerHp: document.getElementById("playerHp"),
+    playerHpBar: document.getElementById("playerHpBar"),
+    startGame: document.getElementById("startGame"),
+    startScreen: document.getElementById("startScreen"),
+    exitGame: document.getElementById("exitGame"),
+    tutorialScreen: document.getElementById("tutorialScreen"),
+    tutorialCanvas: document.getElementById("tutorial3D"),
+    tutorialStep: document.getElementById("tutorialStep"),
+    tutorialMove: document.getElementById("tutorialMove"),
+    tutorialDesc: document.getElementById("tutorialDesc"),
+    tutorialHint: document.getElementById("tutorialHint"),
+    tutorialProgressBar: document.getElementById("tutorialProgressBar"),
+    tutorialNext: document.getElementById("tutorialNext"),
+    tutorialSkip: document.getElementById("tutorialSkip"),
+    tutorialFooterText: document.getElementById("tutorialFooterText"),
+    tutorialAssetStatus: document.getElementById("tutorialAssetStatus"),
+    calReview: document.getElementById("calReview"),
+    calReviewTitle: document.getElementById("calReviewTitle"),
+    calReviewText: document.getElementById("calReviewText"),
+    candidateGrid: document.getElementById("candidateGrid"),
+    calSelectedLabel: document.getElementById("calSelectedLabel"),
+    calUseSelected: document.getElementById("calUseSelected")
+  };
+
+  let stream = null, running = false, raf = 0;
+  let total = 0, rightTotal = 0, leftTotal = 0;
+  let baseline = null;
+  // パンチの時間的な連続性を評価するための全身基準
+  let lastPunchTime = 0;
+  let lastTime = performance.now();
+
+  // 各腕の過去フレームを保持。瞬間的な誤検知を減らす。
+  // 各腕の「引き手→突き→ピーク→戻り」を追跡する状態機械。
+  const arms = {
+    left:  { samples:[], state:'idle', peak:0, peakT:0, startT:0, lastWrist:null, lastT:0, counted:false },
+    right: { samples:[], state:'idle', peak:0, peakT:0, startT:0, lastWrist:null, lastT:0, counted:false }
+  };
+
+  const cooldown = {left:0,right:0};
+
+  // 起動直後の強制5種キャリブレーション。
+  // 「左ストレート → 右ストレート → 左フック → 右フック → アッパー」を
+  // それぞれ10秒以内に最大5件の有効候補を集め、本人が1件を選んで基準として保存する。
+  const calibration = {
+    active:false, trained:false, failed:false, review:false, roundEnding:false,
+    stepStartT:0, stepLimitMs:10000, index:0,
+    labels:['左ストレート','右ストレート','左フック','右フック','アッパー'],
+    profiles:[], candidates:[], candidateSeq:0,
+    selectedCandidate:null, candidateCount:0,
+    maxCandidates:5, minCandidateScore:0.60, lastAcceptedT:0,
+    bestRejected:null, eventBusyUntil:0
+  };
+
+  const STORAGE_KEY='punchArenaCalibrationV4';
+  const VISIT_KEY='punchArenaVisitsV1';
+  let visitData={count:0,lastVisitedAt:null,tutorialCompleted:false};
+
+
+  // 初回だけ表示する「FBX手本チュートリアル」。カメラはこの段階では一切起動しない。
+  // 4つの参照ファイルは、HTMLと同じフォルダから相対パスで読み込みます。
+  // ユーザー指定のファイル名をそのまま使用します。
+  const tutorialMoves=[
+    {label:'右ストレート',desc:'Migi_straight.fbx を参照。右腕をまっすぐ前へ突き出す動きを確認します。',kind:'rightStraight',file:'Migi_straight.fbx',duration:4200},
+    {label:'右フック',desc:'Migi_hook.fbx を参照。右腕を横方向へ振る動きを確認します。',kind:'rightHook',file:'Migi_hook.fbx',duration:4200},
+    {label:'左ストレート',desc:'Hidari_staright.fbx を参照。左腕をまっすぐ前へ突き出す動きを確認します。',kind:'leftStraight',file:'Hidari_staright.fbx',fallback:'Hidari_straight.fbx',duration:4200},
+    {label:'左フック',desc:'Hidari_hook.fbx を参照。左腕を横方向へ振る動きを確認します。',kind:'leftHook',file:'Hidari_hook.fbx',duration:4200}
+  ];
+  const tutorialState={active:false,index:0,startT:0,lastFrameT:0,raf:0,scene:null,camera:null,renderer:null,group:null,loader:null,currentObject:null,currentMixer:null,currentClips:[],loaded:new Map(),loading:new Set()};
+
+  function initTutorial3D(){
+    if(tutorialState.renderer || !window.THREE || !els.tutorialCanvas) return;
+    const THREE=window.THREE, c=els.tutorialCanvas;
+    tutorialState.scene=new THREE.Scene();
+    tutorialState.camera=new THREE.PerspectiveCamera(28,1,.1,100);
+    tutorialState.camera.position.set(0,1.25,6.2);
+    tutorialState.camera.lookAt(0,1.25,0);
+    tutorialState.renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
+    tutorialState.renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+    tutorialState.renderer.setClearColor(0x000000,0);
+    tutorialState.loader=new window.FBXLoader();
+    const hemi=new THREE.HemisphereLight(0x9bc6ff,0x182231,2.2); tutorialState.scene.add(hemi);
+    const key=new THREE.DirectionalLight(0xffffff,2.6); key.position.set(2.4,4.5,3.8); tutorialState.scene.add(key);
+    const rim=new THREE.DirectionalLight(0x5ba7ff,1.4); rim.position.set(-3,2,-2); tutorialState.scene.add(rim);
+    const floor=new THREE.Mesh(new THREE.CircleGeometry(2.1,64),new THREE.MeshStandardMaterial({color:0x0d1622,roughness:.9,metalness:.05,transparent:true,opacity:.9}));
+    floor.rotation.x=-Math.PI/2; floor.position.y=0; tutorialState.scene.add(floor);
+    tutorialState.group=new THREE.Group(); tutorialState.scene.add(tutorialState.group);
+    resizeTutorial3D();
+    window.addEventListener('resize',resizeTutorial3D);
+  }
+
+  function resizeTutorial3D(){
+    if(!tutorialState.renderer||!els.tutorialCanvas) return;
+    const r=els.tutorialCanvas.getBoundingClientRect(); const w=Math.max(1,r.width),h=Math.max(1,r.height);
+    tutorialState.renderer.setSize(w,h,false); tutorialState.camera.aspect=w/h; tutorialState.camera.updateProjectionMatrix();
+  }
+
+  function clearTutorialObject(){
+    if(tutorialState.currentMixer) tutorialState.currentMixer.stopAllAction();
+    tutorialState.currentMixer=null; tutorialState.currentClips=[];
+    if(tutorialState.currentObject && tutorialState.group){
+      tutorialState.group.remove(tutorialState.currentObject);
+      tutorialState.currentObject=null;
+    }
+  }
+
+  function frameFBXObject(obj){
+    const THREE=window.THREE;
+    const box=new THREE.Box3().setFromObject(obj);
+    if(box.isEmpty()) return;
+    const size=box.getSize(new THREE.Vector3());
+    const center=box.getCenter(new THREE.Vector3());
+    const height=Math.max(size.y,0.001);
+    const targetHeight=3.0;
+    const scale=targetHeight/height;
+    obj.scale.multiplyScalar(scale);
+    const box2=new THREE.Box3().setFromObject(obj);
+    const center2=box2.getCenter(new THREE.Vector3());
+    obj.position.sub(center2);
+    obj.position.y += targetHeight*0.50;
+  }
+
+  function loadFBX(url){
+    return new Promise((resolve,reject)=>{
+      if(tutorialState.loaded.has(url)){ resolve(tutorialState.loaded.get(url).clone(true)); return; }
+      if(tutorialState.loading.has(url)){
+        const timer=setInterval(()=>{
+          if(tutorialState.loaded.has(url)){ clearInterval(timer); resolve(tutorialState.loaded.get(url).clone(true)); }
+        },80);
+        setTimeout(()=>{ clearInterval(timer); if(!tutorialState.loaded.has(url)) reject(new Error('timeout')); },12000);
+        return;
+      }
+      tutorialState.loading.add(url);
+      tutorialState.loader.load(url,(obj)=>{
+        tutorialState.loading.delete(url);
+        tutorialState.loaded.set(url,obj);
+        resolve(obj.clone(true));
+      },undefined,(err)=>{
+        tutorialState.loading.delete(url);
+        reject(err||new Error('FBX load failed'));
+      });
+    });
+  }
+
+  async function showTutorialFBX(index){
+    const move=tutorialMoves[index];
+    initTutorial3D();
+    clearTutorialObject();
+    els.tutorialAssetStatus.textContent=`${move.file} を読み込み中…`;
+    let obj=null;
+    try{
+      obj=await loadFBX(move.file);
+    }catch(err){
+      if(move.fallback){
+        try{ obj=await loadFBX(move.fallback); }catch(_e){}
+      }
+    }
+    if(!obj){
+      els.tutorialAssetStatus.textContent=`❌ ${move.file} が見つかりません`;
+      els.tutorialHint.textContent='HTMLと同じフォルダにFBXを置いてください。';
+      return false;
+    }
+    obj.traverse(o=>{
+      if(o.isMesh){ o.castShadow=false; o.receiveShadow=false; if(o.material) o.material.needsUpdate=true; }
+    });
+    frameFBXObject(obj);
+    tutorialState.currentObject=obj;
+    tutorialState.group.add(obj);
+    els.tutorialAssetStatus.textContent=`✓ ${move.file}`;
+    els.tutorialHint.textContent='手本はFBXアニメーションをそのまま再生しています。あなたのカメラ映像はまだ表示されません。';
+    if(obj.animations && obj.animations.length){
+      tutorialState.currentClips=obj.animations;
+      tutorialState.currentMixer=new window.THREE.AnimationMixer(obj);
+      const action=tutorialState.currentMixer.clipAction(obj.animations[0]);
+      action.reset().setLoop(window.THREE.LoopRepeat,Infinity).play();
+    }else{
+      tutorialState.currentClips=[];
+    }
+    return true;
+  }
+
+  function renderTutorial(now){
+    if(!tutorialState.active || !tutorialState.renderer) return;
+    const move=tutorialMoves[tutorialState.index];
+    const elapsed=now-tutorialState.startT; const phase=Math.min(1,elapsed/move.duration);
+    const dt=tutorialState.lastFrameT ? Math.min(.05,(now-tutorialState.lastFrameT)/1000) : 0;
+    tutorialState.lastFrameT=now;
+    if(tutorialState.currentMixer) tutorialState.currentMixer.update(dt);
+    tutorialState.renderer.render(tutorialState.scene,tutorialState.camera);
+    els.tutorialProgressBar.style.width=(phase*100).toFixed(1)+'%';
+    if(phase>=1){
+      if(tutorialState.index < tutorialMoves.length-1){
+        tutorialState.index++; tutorialState.startT=now; tutorialState.lastFrameT=now; updateTutorialUI(); showTutorialFBX(tutorialState.index);
+      }else{
+        els.tutorialNext.textContent='パンチ登録へ進む';
+        els.tutorialFooterText.textContent='4種類のFBX手本は完了。次はカメラをONにして、あなたのパンチ登録へ進みます。';
+      }
+    }
+    tutorialState.raf=requestAnimationFrame(renderTutorial);
+  }
+
+  function updateTutorialUI(){
+    const mv=tutorialMoves[tutorialState.index];
+    els.tutorialStep.textContent=`${tutorialState.index+1} / ${tutorialMoves.length}`;
+    els.tutorialMove.textContent=mv.label; els.tutorialDesc.textContent=mv.desc;
+    els.tutorialProgressBar.style.width='0%';
+    els.tutorialNext.textContent=tutorialState.index===tutorialMoves.length-1?'手本を開始':'次の手本';
+    els.tutorialFooterText.textContent='4種類のFBX手本を順番に確認します。';
+    els.tutorialAssetStatus.textContent='FBX読み込み待機中…';
+  }
+
+  async function startTutorial(){
+    initTutorial3D();
+    tutorialState.active=true; tutorialState.index=0; tutorialState.startT=performance.now(); tutorialState.lastFrameT=performance.now();
+    els.startScreen.style.display='none'; els.tutorialScreen.classList.add('show');
+    updateTutorialUI();
+    await showTutorialFBX(0);
+    if(tutorialState.raf) cancelAnimationFrame(tutorialState.raf);
+    tutorialState.raf=requestAnimationFrame(renderTutorial);
+  }
+
+  function finishTutorialAndStart(){
+    tutorialState.active=false; if(tutorialState.raf) cancelAnimationFrame(tutorialState.raf); tutorialState.raf=0;
+    clearTutorialObject();
+    els.tutorialScreen.classList.remove('show');
+    markTutorialComplete();
+    start();
+  }
+
+  function skipTutorialAndStart(){
+    finishTutorialAndStart();
+  }
+
+  function loadPersistentTraining(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      const saved=JSON.parse(raw);
+      if(!saved || !Array.isArray(saved.profiles) || saved.profiles.length!==5) return false;
+      if(!saved.profiles.every(p=>p && p.kind && Number.isFinite(Number(p.peakSpeed)))) return false;
+      calibration.profiles=saved.profiles;
+      calibration.trained=true;
+      calibration.active=false;
+      calibration.review=false;
+      calibration.failed=false;
+      calibration.index=5;
+      return true;
+    }catch(_e){ return false; }
+  }
+
+  function recordVisit(){
+    try{
+      const prev=JSON.parse(localStorage.getItem(VISIT_KEY)||'{}');
+      visitData={
+        count:Number(prev.count||0)+1,
+        lastVisitedAt:new Date().toISOString(),
+        tutorialCompleted:Boolean(prev.tutorialCompleted)
+      };
+      localStorage.setItem(VISIT_KEY,JSON.stringify(visitData));
+    }catch(_e){}
+  }
+
+  function markTutorialComplete(){
+    try{
+      visitData.tutorialCompleted=true;
+      visitData.lastVisitedAt=new Date().toISOString();
+      localStorage.setItem(VISIT_KEY,JSON.stringify(visitData));
+    }catch(_e){}
+  }
+
+  function savePersistentTraining(){
+    try{
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({version:4,savedAt:new Date().toISOString(),profiles:calibration.profiles}));
+      markTutorialComplete();
+    }catch(_e){}
+  }
+
+  function hasPersistentTraining(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      const saved=raw?JSON.parse(raw):null;
+      return !!(saved && Array.isArray(saved.profiles) && saved.profiles.length===5);
+    }catch(_e){ return false; }
+  }
+
+  let candidateRecorder = null;
+  let candidateRecorderChunks = [];
+  let candidateRecordStartedAt = 0;
+  let candidateRecordStopRequested = false;
+  let candidateRecordBroken = false;
+  let recordCanvas = document.createElement('canvas');
+  let recordCtx = recordCanvas.getContext('2d');
+  let recordStream = null;
+  let poseBusy = false;
+  let poseErrorCount = 0;
+  let poseLastErrorT = 0;
+
+  function updateCalibrationText(now=performance.now()){
+    const el=document.getElementById('calibrationText');
+    if(!el) return;
+    if(calibration.review){
+      el.textContent=`候補選択中 ${calibration.index+1}/5：${calibration.candidates.length}件から1件を選択`;
+    }else if(calibration.active){
+      const remain=Math.max(0, calibration.stepLimitMs-(now-calibration.stepStartT));
+      const name=calibration.labels[calibration.index]||'完了';
+      el.textContent=`初回学習 ${calibration.index+1}/5：${name}　残り ${(remain/1000).toFixed(1)}秒　候補${calibration.candidates.length}/${calibration.maxCandidates}`;
+    }else if(calibration.trained){
+      el.textContent='初回5種パンチ学習: 完了。選択した動作を基準に、パンチの瞬間だけ解析';
+    }else if(calibration.failed){
+      el.textContent='初回5種パンチ学習: 失敗。カメラを再開始してください';
+    }else{
+      el.textContent='初回5種パンチ学習: カメラ開始時に自動開始';
+    }
+  }
+
+  function getRecorderMime(){
+    if(typeof MediaRecorder==='undefined') return '';
+    const types=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4;codecs=avc1.42E01E','video/mp4'];
+    for(const t of types){
+      try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(_e){}
+    }
+    return '';
+  }
+
+  function prepareRecordCanvas(){
+    if(!video.videoWidth || !video.videoHeight) return false;
+    if(recordCanvas.width!==video.videoWidth || recordCanvas.height!==video.videoHeight){
+      recordCanvas.width=video.videoWidth;
+      recordCanvas.height=video.videoHeight;
+    }
+    if(typeof recordCanvas.captureStream==='function' && !recordStream){
+      try{ recordStream=recordCanvas.captureStream(30); }catch(_e){ recordStream=null; }
+    }
+    return !!recordStream;
+  }
+
+  function updateRecordCanvas(){
+    if(!recordCtx || !video.videoWidth || !video.videoHeight) return;
+    if(recordCanvas.width!==video.videoWidth || recordCanvas.height!==video.videoHeight){
+      recordCanvas.width=video.videoWidth;
+      recordCanvas.height=video.videoHeight;
+    }
+    // 録画映像も画面表示と同じ左右反転。候補側では再反転しない。
+    recordCtx.save();
+    recordCtx.clearRect(0,0,recordCanvas.width,recordCanvas.height);
+    recordCtx.translate(recordCanvas.width,0);
+    recordCtx.scale(-1,1);
+    recordCtx.drawImage(video,0,0,recordCanvas.width,recordCanvas.height);
+    recordCtx.restore();
+  }
+
+  function startCandidateRecording(now){
+    // 生のgetUserMediaストリームを録画すると、Safari等で黒画面になりやすいため、
+    // カメラ映像を描いたcanvas.captureStream()を録画する。
+    candidateRecordStartedAt=now;
+    candidateRecordStopRequested=false;
+    candidateRecordBroken=false;
+    if(candidateRecorder && candidateRecorder.state!=='inactive') return;
+    candidateRecorder=null;
+    candidateRecorderChunks=[];
+    updateRecordCanvas();
+    const mime=getRecorderMime();
+    const source=prepareRecordCanvas() ? recordStream : stream;
+    if(!mime || !source) { candidateRecordBroken=true; return; }
+    try{
+      candidateRecorder=new MediaRecorder(source,{mimeType:mime});
+      candidateRecorder.ondataavailable=e=>{
+        try{ if(e.data&&e.data.size) candidateRecorderChunks.push(e.data); }catch(_e){}
+      };
+      candidateRecorder.onerror=()=>{ candidateRecordBroken=true; };
+      candidateRecorder.start(80);
+    }catch(e){
+      candidateRecordBroken=true;
+      candidateRecorder=null;
+      candidateRecordChunks=[];
+    }
+  }
+
+  function stopCandidateRecording(){
+    return new Promise(resolve=>{
+      const started=candidateRecordStartedAt;
+      const rec=candidateRecorder;
+      const chunks=candidateRecorderChunks;
+      candidateRecordStopRequested=true;
+      candidateRecorder=null;
+      candidateRecorderChunks=[];
+      const finish=()=>{
+        let blob=null;
+        if(!candidateRecordBroken){
+          try{
+            if(chunks.length) blob=new Blob(chunks,{type:(rec&&rec.mimeType)||'video/webm'});
+          }catch(_e){ blob=null; }
+        }
+        resolve({blob,duration:Math.max(0,performance.now()-started)});
+      };
+      if(!rec || rec.state==='inactive'){ finish(); return; }
+      let done=false;
+      const once=()=>{ if(done) return; done=true; finish(); };
+      rec.addEventListener('stop',once,{once:true});
+      rec.addEventListener('error',once,{once:true});
+      try{ rec.stop(); }catch(_e){ once(); }
+      setTimeout(once,700);
+    });
+  }
+
+  function candidateScoreLabel(v){ return Math.round(clamp(v)*100)+'%'; }
+
+  function candidateTypeName(kind){
+    return kind==='uppercut'?'アッパー':kind==='hook'?'フック':'ストレート';
+  }
+
+  function candidateCard(candidate, idx){
+    const card=document.createElement('label');
+    card.className='candidate';
+    card.dataset.index=String(idx);
+    const input=document.createElement('input');
+    input.type='radio'; input.name='calCandidate'; input.value=String(idx);
+    let preview;
+    if(candidate.blob){
+      const vid=document.createElement('video');
+      vid.muted=true; vid.playsInline=true; vid.controls=true; vid.preload='metadata';
+      candidate.url=URL.createObjectURL(candidate.blob);
+      vid.src=candidate.url;
+      vid.addEventListener('error',()=>{
+        const ph=document.createElement('div');
+        ph.className='candidate-placeholder';
+        ph.textContent='録画データをこのブラウザで再生できません\n（動作データは保存済み）';
+        if(preview===vid){ vid.replaceWith(ph); preview=ph; }
+      },{once:true});
+      preview=vid;
+    }else{
+      const ph=document.createElement('div');
+      ph.className='candidate-placeholder';
+      ph.textContent='映像録画を取得できませんでした\n（動作データは保存済み）';
+      preview=ph;
+    }
+    const meta=document.createElement('div'); meta.className='meta';
+    const tag=document.createElement('span'); tag.className='tag';
+    tag.textContent=`候補${idx+1}`;
+    const info=document.createElement('span');
+    info.textContent=`${candidateTypeName(candidate.kind)} / ${candidateScoreLabel(candidate.score)}`;
+    meta.append(tag,info);
+    card.append(input,preview,meta);
+    card.addEventListener('click',()=>{
+      document.querySelectorAll('.candidate').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      input.checked=true;
+      calibration.selectedCandidate=idx;
+      els.calUseSelected.disabled=false;
+      els.calSelectedLabel.textContent=`選択中：候補${idx+1}　${candidateTypeName(candidate.kind)}　確度目安 ${candidateScoreLabel(candidate.score)}`;
+    });
+    return card;
+  }
+
+  function showCalibrationReview(){
+    calibration.review=true;
+    calibration.active=false;
+    calibration.selectedCandidate=null;
+    enemyAttack.state='idle';
+    enemyAttack.nextAttackT=0;
+    els.calReviewTitle.textContent=`${calibration.labels[calibration.index]}：候補を選択`;
+    els.calReviewText.textContent=calibration.candidates.length
+      ? `この10秒間から短く録画した${calibration.candidates.length}件です。一番この技らしい1件を選んでください。`
+      : '候補が録画できませんでした。時間切れのため、自動基準を作成して次へ進めます。';
+    els.candidateGrid.innerHTML='';
+    if(!calibration.candidates.length){
+      const e=document.createElement('div'); e.className='candidate-empty'; e.textContent='候補なし：次の学習へ自動で進みます。';
+      els.candidateGrid.appendChild(e);
+      els.calUseSelected.disabled=true;
+    }else{
+      calibration.candidates.sort((a,b)=>b.score-a.score);
+      calibration.candidates.forEach((c,i)=>els.candidateGrid.appendChild(candidateCard(c,i)));
+      els.calUseSelected.disabled=false;
+      // 最も高得点の候補を初期選択。ユーザーは別候補へ変更できる。
+      const first=els.candidateGrid.querySelector('.candidate');
+      if(first){
+        first.classList.add('selected');
+        const input=first.querySelector('input');
+        input.checked=true;
+        calibration.selectedCandidate=0;
+        els.calSelectedLabel.textContent=`自動選択候補1（変更できます）　確度目安 ${candidateScoreLabel(calibration.candidates[0].score)}`;
+      }
+    }
+    els.calReview.classList.add('show');
+    els.status.textContent=`候補選択 ${calibration.index+1}/5`;
+    els.scoreText.textContent='録画を見て一番良い候補を選択してください';
+    updateCalibrationText();
+  }
+
+  function closeCalibrationReview(){
+    els.calReview.classList.remove('show');
+    for(const c of calibration.candidates){
+      if(c.url) try{ URL.revokeObjectURL(c.url); }catch(_e){}
+      c.url=null;
+    }
+    calibration.candidates=[];
+    calibration.selectedCandidate=null;
+    els.candidateGrid.innerHTML='';
+    els.calUseSelected.disabled=true;
+  }
+
+  function saveSelectedCalibration(now){
+    if(!calibration.review) return;
+    const c=calibration.candidates[calibration.selectedCandidate ?? 0];
+    const idx=calibration.index;
+    if(c){
+      calibration.profiles.push({side:c.side,kind:c.kind,...c.features,selectionScore:c.score,reason:'user-selected'});
+    }else{
+      const [wantSide,wantKind]=expectedCalibration(idx);
+      const fallback={peakSpeed:0.58,peakExtension:0.96,peakAccel:0.10,dx:0,dy:0,dxAbs:0.04,dyAbs:0.04,forward:0.035,extGain:0.055,duration:260,visibility:0.75,horizontalRatio:0.5,verticalRatio:0.5,forwardRatio:0.35,meanSpeed:0.42,postPeak:0.02,peakAge:120,normDx:0.12,normDy:0.12,normForward:0.20,torsoScale:0.18};
+      calibration.profiles.push({side:wantSide==='any'?'right':wantSide,kind:wantKind,...fallback,selectionScore:0.5,reason:'fallback'});
+    }
+    closeCalibrationReview();
+    calibration.review=false;
+    calibration.index++;
+    calibration.candidateCount=0;
+    calibration.lastAcceptedT=0;
+    calibration.bestRejected=null;
+    calibration.eventBusyUntil=0;
+    calibration.roundEnding=false;
+    if(calibration.index>=5){
+      finishCalibration();
+      return;
+    }
+    calibration.active=true;
+    calibration.stepStartT=now;
+    calibration.candidates=[];
+    resetArm(arms.left); resetArm(arms.right);
+    els.status.textContent=`初回パンチ学習 ${calibration.index+1}/5`;
+    els.scoreText.textContent=`${calibration.labels[calibration.index]} を10秒以内に最大5回、候補を集めます`;
+    updateCalibrationText(now);
+  }
+
+  function startCalibration(now=performance.now()){
+    closeCalibrationReview();
+    calibration.active=true;
+    calibration.trained=false;
+    calibration.failed=false;
+    calibration.review=false;
+    calibration.roundEnding=false;
+    calibration.stepStartT=now;
+    calibration.index=0;
+    calibration.profiles=[];
+    calibration.candidates=[];
+    calibration.candidateCount=0;
+    calibration.selectedCandidate=null;
+    calibration.lastAcceptedT=0;
+    calibration.bestRejected=null;
+    calibration.eventBusyUntil=0;
+    resetArm(arms.left); resetArm(arms.right);
+    cooldown.left=0; cooldown.right=0;
+    enemyAttack.state='idle';
+    enemyAttack.nextAttackT=0;
+    els.scoreText.textContent=`1つ目: ${calibration.labels[0]} を10秒以内に最大5回。候補を録画します`;
+    els.confidence.textContent='—';
+    els.status.textContent='初回パンチ学習 1/5';
+    updateCalibrationText(now);
+  }
+
+  function finishCalibration(){
+    closeCalibrationReview();
+    calibration.active=false;
+    calibration.review=false;
+    calibration.trained=true;
+    calibration.failed=false;
+    calibration.index=5;
+    savePersistentTraining();
+    resetArm(arms.left); resetArm(arms.right);
+    enemyAttack.state='idle';
+    enemyAttack.nextAttackT=performance.now()+1800;
+    calibration.eventBusyUntil=0;
+    els.status.textContent='学習完了！パンチ可能';
+    els.scoreText.textContent='学習終了。選択した5つの動作を基準に、パンチした瞬間だけ解析します';
+    els.confidence.textContent='0%';
+    updateCalibrationText();
+  }
+
+  function failCalibration(){
+    calibration.active=false; calibration.review=false; calibration.failed=true; calibration.trained=false;
+    calibration.profiles=[]; calibration.candidates=[]; calibration.selectedCandidate=null;
+    closeCalibrationReview();
+    resetArm(arms.left); resetArm(arms.right);
+    enemyAttack.state='idle'; enemyAttack.nextAttackT=0;
+    calibration.eventBusyUntil=0;
+    els.status.textContent='初回学習失敗';
+    els.scoreText.textContent='学習を完了できませんでした。カメラを再開始してください';
+    els.confidence.textContent='—';
+    updateCalibrationText();
+  }
+
+  function expectedCalibration(index){
+    return [
+      ['left','straight'],['right','straight'],['left','hook'],['right','hook'],['any','uppercut']
+    ][index] || ['any','straight'];
+  }
+
+  function calibrationCandidateScore(index, side, kind, f){
+    const [wantSide,wantKind]=expectedCalibration(index);
+    const sideFit=wantSide==='any' ? 1 : (side===wantSide ? 1 : 0.08);
+    const horiz=Math.abs(f.dx), vert=Math.abs(f.dy), dirSum=Math.max(horiz+vert,0.001);
+    const vertical=vert/dirSum, horizontal=horiz/dirSum;
+    const forward=Math.max(0,Number(f.forward)||0);
+    let kindFit=0.0;
+    if(wantKind==='uppercut'){
+      kindFit=clamp((-f.dy/dirSum)*0.72 + vertical*0.28);
+      if(f.dy>=-0.025) kindFit*=0.35;
+    }else if(wantKind==='hook'){
+      kindFit=clamp(horizontal*0.82 + (1-Math.min(vertical,1))*0.18);
+      if(horizontal<0.52) kindFit*=0.45;
+    }else{
+      kindFit=clamp((f.forwardRatio*0.58) + (f.extGain>0.035?0.25:0) + (f.peakExtension>0.90?0.17:0));
+      if(f.forwardRatio<0.14) kindFit*=0.40;
+    }
+    const quality=(
+      clamp((f.peakSpeed-0.34)/0.62)*0.20+
+      clamp((f.peakExtension-0.84)/0.16)*0.18+
+      clamp(f.forward/0.045)*0.12+
+      clamp(f.extGain/0.075)*0.18+
+      clamp(f.peakAccel/0.20)*0.12+
+      clamp(f.visibility/0.72)*0.10+
+      clamp(1-Math.abs(f.duration-260)/300)*0.10
+    );
+    // 期待技と反対の動きは候補に残さない方向へ強く寄せる。
+    let score=clamp(0.25*sideFit+0.43*kindFit+0.32*quality);
+    if(wantKind==='hook' && horizontal<0.52) score*=0.55;
+    if(wantKind==='uppercut' && f.dy>-0.025) score*=0.50;
+    if(wantKind==='straight' && f.forwardRatio<0.14) score*=0.55;
+    return score;
+  }
+
+  function queueCalibrationCandidate(side,kind,f,now){
+    if(!calibration.active || calibration.roundEnding || calibration.candidates.length>=calibration.maxCandidates) return null;
+    if(now-calibration.lastAcceptedT<700) return null;
+    const score=calibrationCandidateScore(calibration.index,side,kind,f);
+    const [wantSide,wantKind]=expectedCalibration(calibration.index);
+    const sideOk=wantSide==='any'||side===wantSide;
+    const kindOk=(kind===wantKind);
+    const acceptThreshold=calibration.minCandidateScore;
+    const candidate={id:++calibration.candidateSeq,side,kind,features:{...f},score,t:now,blob:null,url:null};
+    // 技が違う候補は「録画済み候補」に入れず破棄する。誤ったフック/アッパー等で5枠を消費しない。
+    if(!sideOk || !kindOk || score<acceptThreshold){
+      if(!calibration.bestRejected || score>calibration.bestRejected.score){ calibration.bestRejected=candidate; }
+      return null;
+    }
+    calibration.candidates.push(candidate);
+    calibration.lastAcceptedT=now;
+    calibration.candidateCount=calibration.candidates.length;
+    return candidate;
+  }
+
+  async function captureAndStoreCandidate(candidate){
+    const result=await stopCandidateRecording();
+    if(result.blob) candidate.blob=result.blob;
+    candidate.recordDuration=result.duration;
+    calibration.candidateCount=calibration.candidates.length;
+    if(calibration.candidates.length>=calibration.maxCandidates && calibration.active && !calibration.review){
+      endCalibrationRound(performance.now());
+    }
+  }
+
+  function endCalibrationRound(now=performance.now()){
+    if(!calibration.active || calibration.roundEnding) return;
+    calibration.roundEnding=true;
+    calibration.active=false;
+    // 有効候補が0件なら、その10秒間で最も近かった1件だけを救済候補として表示する。
+    // それでも「5個録画済み」とは扱わない。
+    if(calibration.candidates.length===0 && calibration.bestRejected){
+      const r=calibration.bestRejected;
+      r.score=Math.max(r.score,0.35);
+      r.reason='fallback-low-confidence';
+      calibration.candidates.push(r);
+      calibration.candidateCount=1;
+    }
+    setTimeout(()=>{
+      if(!running) return;
+      calibration.roundEnding=false;
+      showCalibrationReview();
+    },120);
+    els.status.textContent=`候補を確認 ${calibration.index+1}/5`;
+    els.scoreText.textContent='録画した候補を確認しています…';
+    updateCalibrationText(now);
+  }
+
+  function similarity(a,b,key,den=.08){
+    const av=Number(a[key])||0, bv=Number(b[key])||0;
+    return 1-clamp(Math.abs(av-bv)/Math.max(Math.abs(bv)*0.9,den));
+  }
+
+  function scorePunchAgainstProfiles(side, f){
+    if(!calibration.profiles.length) return 0;
+    const kind=classifyGesture(side,f);
+    let best=0;
+    for(const p of calibration.profiles){
+      const sideSim=(p.side===side)?1:0.10;
+      const kindSim=(p.kind===kind)?1:0.08;
+      const motionSim=(
+        similarity(f,p,'peakSpeed',0.15)*0.17+
+        similarity(f,p,'meanSpeed',0.12)*0.08+
+        similarity(f,p,'peakExtension',0.05)*0.14+
+        similarity(f,p,'forward',0.028)*0.10+
+        similarity(f,p,'normForward',0.08)*0.08+
+        similarity(f,p,'normDx',0.08)*0.05+
+        similarity(f,p,'normDy',0.08)*0.05+
+        similarity(f,p,'extGain',0.025)*0.10+
+        similarity(f,p,'horizontalRatio',0.18)*0.08+
+        similarity(f,p,'verticalRatio',0.18)*0.08+
+        similarity(f,p,'peakAccel',0.12)*0.08+
+        similarity(f,p,'duration',90)*0.05+
+        similarity(f,p,'visibility',0.12)*0.06
+      );
+      const directionBonus = kind==='uppercut'
+        ? clamp((-f.dy)/Math.max(Math.abs(f.dx)+Math.abs(f.dy),0.001))*0.16
+        : kind==='hook'
+          ? clamp(Math.abs(f.dx)/Math.max(Math.abs(f.dx)+Math.abs(f.dy),0.001))*0.14
+          : clamp((f.forwardRatio*0.7 + f.extGain*2.5)*0.14);
+      const antiFalsePositive = clamp((f.peakSpeed>0.35?0.10:0)+(f.extGain>0.025?0.11:0)+(f.peakExtension>0.90?0.09:0)+(f.forwardRatio>0.20?0.08:0));
+      const quality=(
+        clamp((f.peakSpeed-0.30)/0.75)*0.22+
+        clamp((f.peakExtension-0.83)/0.17)*0.22+
+        clamp(f.forward/0.055)*0.17+
+        clamp(f.extGain/0.09)*0.17+
+        clamp(f.peakAccel/0.24)*0.09+
+        clamp(f.visibility/0.75)*0.13
+      );
+      const temporalShape = clamp((1-Math.abs(f.duration-p.duration)/Math.max(p.duration,120))*0.75 + (f.postPeak<0.035?0.25:0));
+      const score=(motionSim*0.44 + quality*0.28 + directionBonus + antiFalsePositive*0.16 + temporalShape*0.12) * (0.56 + 0.26*sideSim + 0.18*kindSim);
+      best=Math.max(best,score);
+    }
+    return clamp(best);
+  }
+
+  // 胸中心トラッキング。肩・腰4点を使い、速度に応じて追従速度を変える。
+  let chestMarker = null;
+  let chestMarkerVelocity = {x:0,y:0};
+  let chestMarkerLastT = 0;
+
+  // 2Dモンスター戦闘。画像素材なしでCanvas描画するので、このHTML単体で動く。
+  const monster = {
+    hp:100, maxHp:100, name:'スライム', kind:0,
+    hitFlash:0, shake:0, defeated:false, defeatT:0,
+    damageTexts:[], nextSpawnT:0
+  };
+
+  const monsterKinds = [
+    {name:'スライム', body:'slime'},
+    {name:'ゴブリン', body:'goblin'},
+    {name:'ミニドラゴン', body:'dragon'}
+  ];
+
+
+  // プレイヤー側のHPと、敵の予告→発射→命中を管理。
+  const player = {
+    hp:100,
+    maxHp:100,
+    damageFlash:0,
+    invulnerableUntil:0
+  };
+
+  const enemyAttack = {
+    state:'idle',
+    startT:0,
+    sweepStartT:0,
+    sweepDuration:900,
+    hit:false,
+    damage:15,
+    pattern:null,
+    label:'',
+    lastPatternId:-1,
+    comboIndex:0,
+    attacksStarted:0,
+    difficulty:0,
+    nextAttackT:0,
+    activeStep:0,
+    flashUntil:0
+  };
+
+  function clamp(v,a=0,b=1){ return Math.max(a,Math.min(b,v)); }
+  function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+  function angle(a,b,c){
+    const ab={x:a.x-b.x,y:a.y-b.y}, cb={x:c.x-b.x,y:c.y-b.y};
+    const d=Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);
+    if(!d) return 180;
+    return Math.acos(clamp((ab.x*cb.x+ab.y*cb.y)/d,-1,1))*180/Math.PI;
+  }
+
+  function getArm(lm,side){
+    const shoulder=lm[side==='left'?11:12];
+    const elbow=lm[side==='left'?13:14];
+    const wrist=lm[side==='left'?15:16];
+    const other=lm[side==='left'?12:11];
+    if(!shoulder||!elbow||!wrist||!other) return null;
+    const v=(shoulder.visibility||0)*(elbow.visibility||0)*(wrist.visibility||0);
+    return {shoulder,elbow,wrist,other,visibility:v};
+  }
+
+  function resetArm(a){
+    a.samples.length=0;
+    a.state='idle';
+    a.eventStart=0;
+    a.eventSamples=[];
+    a.lastWrist=null;
+    a.lastT=0;
+    a.cooldownUntil=0;
+    a.lastScore=0;
+    a.lastScoreT=0;
+    a.countedOnce=false;
+  }
+
+  function makeEventFeatures(st, now, visibility){
+    const arr=st.eventSamples;
+    if(arr.length<3) return null;
+    const first=arr[0], last=arr[arr.length-1];
+    const torsoScale=Math.max(Number(first.torso)||Number(last.torso)||0.18,0.10);
+    let peakSpeed=0, peakExtension=0, peakAccel=0, meanSpeed=0, peakT=first.t;
+    for(let i=0;i<arr.length;i++){
+      const sp=arr[i].speed||0;
+      meanSpeed+=sp;
+      if(sp>peakSpeed){ peakSpeed=sp; peakT=arr[i].t; }
+      peakExtension=Math.max(peakExtension,arr[i].ext||0);
+      if(i>0){
+        const dt=Math.max((arr[i].t-arr[i-1].t)/1000,0.008);
+        const acc=(arr[i].speed-arr[i-1].speed)/dt;
+        peakAccel=Math.max(peakAccel,acc);
+      }
+    }
+    meanSpeed/=arr.length;
+    const duration=Math.max(1,last.t-first.t);
+    const dx=last.x-first.x;
+    const dy=last.y-first.y;
+    const forward=first.z-last.z;
+    const extGain=peakExtension-(first.ext||0);
+    const peakPoint=arr.reduce((best,v)=>(v.speed>best.speed?v:best),arr[0]);
+    const postPeak=Math.max(0,last.ext-(peakPoint.ext||0));
+    const directionTotal=Math.hypot(dx,dy);
+    const horizontalRatio=Math.abs(dx)/Math.max(directionTotal,0.001);
+    const verticalRatio=Math.abs(dy)/Math.max(directionTotal,0.001);
+    const forwardRatio=Math.max(0,forward)/Math.max(Math.abs(forward)+directionTotal,0.001);
+    return {
+      peakSpeed, meanSpeed, peakExtension, peakAccel,
+      dx, dy, dxAbs:Math.abs(dx), dyAbs:Math.abs(dy),
+      forward:Math.max(0,forward), extGain, postPeak,
+      normDx:dx/torsoScale, normDy:dy/torsoScale, normForward:Math.max(0,forward)/torsoScale,
+      horizontalRatio, verticalRatio, forwardRatio, torsoScale,
+      duration, peakAge:Math.max(0,last.t-peakT), visibility
+    };
+  }
+
+  // 動作の向きから大分類を作る。
+  // x/y はカメラ画像の内部座標で判定し、表示側の左右反転とは分離する。
+  function classifyGesture(side, f){
+    const dx=Number(f.dx)||0;
+    const dy=Number(f.dy)||0;
+    const horiz=Math.abs(dx);
+    const vert=Math.abs(dy);
+    const forward=Number(f.forward)||0;
+    const extGain=Number(f.extGain)||0;
+    const total=Math.max(horiz+vert,0.001);
+    const upperScore=clamp((-dy/total)*0.72 + clamp(extGain/0.08)*0.28);
+    const hookScore=clamp((horiz/total)*0.82 + clamp(Math.abs(dx)/(Math.abs(dx)+Math.abs(forward)+0.001))*0.18);
+    const straightScore=clamp((forward/Math.max(forward+horiz*0.8+vert*0.45,0.001))*0.72 + clamp(extGain/0.10)*0.28);
+
+    if(upperScore>0.58 && upperScore>=hookScore && upperScore>=straightScore){
+      return 'uppercut';
+    }
+    if(hookScore>0.62 && hookScore>=straightScore){
+      return 'hook';
+    }
+    return 'straight';
+  }
+
+  // 通常時は「パンチ開始の瞬間」だけを軽く検知し、発生した短いイベント窓だけ詳細解析する。
+  function detectArm(lm, side, now){
+    const arm=getArm(lm,side);
+    if(!arm) return {score:0,valid:false,state:'lost',debug:{}};
+    const {shoulder,elbow,wrist,other,visibility}=arm;
+    const st=arms[side];
+    const torsoScale=Math.max(dist(shoulder,other),0.10);
+    const dt=st.lastT ? Math.max((now-st.lastT)/1000,0.008) : 1/30;
+    const prev=st.lastWrist||wrist;
+    const dx=wrist.x-prev.x, dy=wrist.y-prev.y, dz=(wrist.z??0)-(prev.z??0);
+    const speed=Math.hypot(dx,dy,dz*0.78)/dt;
+    const extension=dist(shoulder,wrist)/Math.max(dist(shoulder,elbow)+dist(elbow,wrist),0.001);
+    st.samples.push({t:now,x:wrist.x,y:wrist.y,z:wrist.z??0,ext:extension,speed,torso:torsoScale});
+    while(st.samples.length>14) st.samples.shift();
+
+    if(calibration.active && now-calibration.stepStartT>=calibration.stepLimitMs){
+      endCalibrationRound(now);
+      st.lastWrist={x:wrist.x,y:wrist.y,z:wrist.z??0}; st.lastT=now;
+      return {score:0,valid:visibility>0.50,state:'idle',debug:{speed,extension,visibility}};
+    }
+
+    const isUpper=calibration.active && calibration.index===4;
+    const isHook=calibration.active && (calibration.index===2 || calibration.index===3);
+    const isStraight=calibration.active && (calibration.index===0 || calibration.index===1);
+    const expectedSide=calibration.active ? expectedCalibration(calibration.index)[0] : 'any';
+    const sideAllowed=expectedSide==='any' || expectedSide===side;
+    const calibrationMotion = isUpper
+      ? (dy < -0.010 && Math.abs(dy) > Math.abs(dx)*0.45 && speed>0.30 && extension>0.56)
+      : isHook
+        ? (Math.abs(dx)>0.012 && Math.abs(dx)>Math.abs(dy)*0.80 && speed>0.34 && extension>0.66)
+        : (speed>0.34 && ((Math.abs(dz)>0.008 && extension>0.68) || (Math.abs(dx)>0.016 && extension>0.78)));
+    const globalTrainingLock = calibration.active ? now>=calibration.eventBusyUntil : true;
+    const onset = visibility>0.55 && sideAllowed && globalTrainingLock && now>=st.cooldownUntil && calibrationMotion;
+
+    if(st.state==='idle'){
+      if(onset && !calibration.review && !calibration.roundEnding){
+        st.state='event';
+        st.eventStart=now;
+        st.eventSamples=[{t:now,x:wrist.x,y:wrist.y,z:wrist.z??0,ext:extension,speed,torso:torsoScale}];
+        st.countedOnce=false;
+        if(calibration.active){ calibration.eventBusyUntil=now+900; startCandidateRecording(now); }
+      }
+    }else if(st.state==='event'){
+      st.eventSamples.push({t:now,x:wrist.x,y:wrist.y,z:wrist.z??0,ext:extension,speed,torso:torsoScale});
+      const elapsed=now-st.eventStart;
+      const features=makeEventFeatures(st,now,visibility);
+      const peak=features ? features.peakSpeed : speed;
+      const endEvent=elapsed>=160 && (elapsed>=480 || (features && peak>0.42 && speed<peak*0.50 && extension<features.peakExtension-0.015));
+      if(endEvent && !st.processing){
+        st.processing=true;
+        const finalFeatures=features;
+        if(finalFeatures){
+          const kind=classifyGesture(side,finalFeatures);
+          if(calibration.active){
+            const candidate=queueCalibrationCandidate(side,kind,finalFeatures,now);
+            if(candidate){
+              captureAndStoreCandidate(candidate).finally(()=>{
+                st.processing=false;
+                if(st.state==='event'){st.state='cooldown';st.cooldownUntil=performance.now()+100;st.eventSamples.length=0;}
+              });
+            }else{
+              stopCandidateRecording().then(result=>{
+                // 有効候補に届かなかった場合だけ、最もそれっぽかった1件の録画を救済保存。
+                if(result.blob && calibration.candidates.length===0 && calibration.bestRejected){
+                  calibration.bestRejected.blob=result.blob;
+                  calibration.bestRejected.recordDuration=result.duration;
+                }
+              }).finally(()=>{st.processing=false;st.state='cooldown';st.cooldownUntil=now+100;st.eventSamples.length=0;});
+            }
+          }else if(calibration.trained){
+            const score=scorePunchAgainstProfiles(side,finalFeatures);
+            st.lastScore=score; st.lastScoreT=now;
+            els.confidence.textContent=Math.round(score*100)+'%';
+            els.scoreBar.style.width=Math.round(score*100)+'%';
+            els.scoreText.textContent=score>=0.60?'パンチ成立':'パンチ瞬間を解析しました';
+            if(score>=0.60 && !st.countedOnce){
+              st.countedOnce=true; cooldown[side]=now+100;
+              total++;
+              if(side==='right') rightTotal++; else leftTotal++;
+              els.count.textContent=total; els.rightCount.textContent=rightTotal; els.leftCount.textContent=leftTotal;
+              els.status.textContent=(side==='right'?'右':'左')+'パンチ！';
+              els.status.classList.add('detected');
+              setTimeout(()=>els.status.classList.remove('detected'),180);
+              damageMonster(18+Math.round(score*12),now);
+            }
+            st.processing=false; st.state='cooldown'; st.cooldownUntil=now+100; st.eventSamples.length=0;
+          }else{
+            stopCandidateRecording().finally(()=>{st.processing=false;st.state='cooldown';st.cooldownUntil=now+100;st.eventSamples.length=0;});
+          }
+        }else{
+          stopCandidateRecording().finally(()=>{st.processing=false;st.state='cooldown';st.cooldownUntil=now+100;st.eventSamples.length=0;});
+        }
+      }
+    }else if(st.state==='cooldown'){
+      if(now>=st.cooldownUntil) st.state='idle';
+    }
+
+    st.lastWrist={x:wrist.x,y:wrist.y,z:wrist.z??0}; st.lastT=now;
+    const activeScore=(st.lastScoreT&&now-st.lastScoreT<260&&!calibration.active)?st.lastScore:0;
+    return {score:activeScore,valid:visibility>0.50,state:st.state,debug:{speed,extension,visibility}};
+  }
+
+
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function pointLineDistance(p,a,b){
+    const abx=b.x-a.x, aby=b.y-a.y;
+    const denom=abx*abx+aby*aby;
+    if(!denom) return Math.hypot(p.x-a.x,p.y-a.y);
+    const t=clamp(((p.x-a.x)*abx+(p.y-a.y)*aby)/denom,0,1);
+    const q={x:a.x+abx*t,y:a.y+aby*t};
+    return Math.hypot(p.x-q.x,p.y-q.y);
+  }
+
+  function updateChestMarker(lm, now){
+    // 胸の中心は「肩の中心→腰の中心」の約32%地点。
+    // 4点平均だと腹寄りになるため、肩を強く重視する。
+    const ls=lm[11], rs=lm[12], lh=lm[23], rh=lm[24];
+    const haveShoulders=ls&&rs;
+    if(!haveShoulders) return null;
+    const sc={x:(ls.x+rs.x)*0.5,y:(ls.y+rs.y)*0.5};
+    let x=sc.x, y=sc.y+0.115;
+    if(lh&&rh){
+      const hc={x:(lh.x+rh.x)*0.5,y:(lh.y+rh.y)*0.5};
+      x=lerp(sc.x,hc.x,0.18);
+      y=lerp(sc.y,hc.y,0.32);
+    }
+    // 胸の基準点を少し上へ寄せて、みぞおち・腹を避ける。
+    y-=0.018;
+    if(!chestMarker){
+      chestMarker={x,y};
+      chestMarkerVelocity={x:0,y:0};
+      chestMarkerLastT=now;
+      return chestMarker;
+    }
+    const dt=Math.max((now-chestMarkerLastT)/1000,0.016);
+    const vx=(x-chestMarker.x)/dt, vy=(y-chestMarker.y)/dt;
+    chestMarkerVelocity.x=lerp(chestMarkerVelocity.x,vx,0.35);
+    chestMarkerVelocity.y=lerp(chestMarkerVelocity.y,vy,0.35);
+    const movement=Math.hypot(x-chestMarker.x,y-chestMarker.y);
+    const alpha=clamp(0.24+movement*2.8,0.24,0.62);
+    chestMarker.x=lerp(chestMarker.x,x,alpha);
+    chestMarker.y=lerp(chestMarker.y,y,alpha);
+    chestMarkerLastT=now;
+    return chestMarker;
+  }
+
+  function drawChestMarker(lm, visible, now){
+    if(!visible) return;
+    const p=updateChestMarker(lm,now);
+    if(!p) return;
+    const x=(1-p.x)*canvas.width, y=p.y*canvas.height;
+    const r=Math.max(16,Math.min(canvas.width,canvas.height)*0.030);
+    ctx.save();
+    ctx.lineWidth=5;
+    ctx.strokeStyle='#ffd83d';
+    ctx.shadowColor='rgba(255,216,61,.75)';
+    ctx.shadowBlur=12;
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
+    ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(x,y,r*0.38,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
+  function resetPlayer(){
+    player.hp=player.maxHp;
+    player.damageFlash=0;
+    player.invulnerableUntil=0;
+    els.playerHp.textContent=`${player.hp} / ${player.maxHp}`;
+    if(els.playerHpBar) els.playerHpBar.style.width=(player.hp/player.maxHp*100)+'%';
+  }
+
+  function spawnMonster(){
+    const k=monsterKinds[Math.floor(Math.random()*monsterKinds.length)];
+    monster.hp=monster.maxHp=100;
+    monster.name=k.name;
+    monster.kind=monsterKinds.indexOf(k);
+    monster.hitFlash=0; monster.shake=0; monster.defeated=false; monster.defeatT=0;
+    monster.damageTexts=[];
+    els.monsterName.textContent=monster.name;
+    els.monsterHp.textContent=`${monster.hp} / ${monster.maxHp}`;
+    els.monsterHpBar.style.width='100%';
+    els.monsterHelp.textContent='パンチで攻撃！';
+  }
+
+  function damageMonster(amount, now){
+    if(!calibration.trained || calibration.active || monster.defeated) return;
+    monster.hp=Math.max(0,monster.hp-amount);
+    monster.hitFlash=now+180;
+    monster.shake=now+220;
+    monster.damageTexts.push({amount,x:0.79,y:0.47,t:now,life:750});
+    els.monsterHp.textContent=`${monster.hp} / ${monster.maxHp}`;
+    els.monsterHpBar.style.width=(monster.hp/monster.maxHp*100)+'%';
+    els.monsterHelp.textContent=monster.hp>0?'ヒット！':'撃破！';
+    if(monster.hp<=0){
+      monster.defeated=true;
+      monster.defeatT=now;
+      setTimeout(()=>{ if(running && calibration.trained) spawnMonster(); },900);
+    }
+  }
+
+  // 攻撃は「線をランダム表示」ではなく、回避の仕方が異なる複数カテゴリを使う。
+  // 座標は表示キャンバス基準。左右反転したカメラ表示と独立している。
+  const attackPatterns = [
+    // 単発スイープ：上/中/下、左/中央/右
+    {id:1,type:'sweep',name:'上→下・左',a:[0.16,-0.12],b:[0.16,1.12],lane:54,dir:'v'},
+    {id:2,type:'sweep',name:'上→下・中央',a:[0.50,-0.12],b:[0.50,1.12],lane:54,dir:'v'},
+    {id:3,type:'sweep',name:'上→下・右',a:[0.84,-0.12],b:[0.84,1.12],lane:54,dir:'v'},
+    {id:4,type:'sweep',name:'下→上・左',a:[0.16,1.12],b:[0.16,-0.12],lane:54,dir:'v'},
+    {id:5,type:'sweep',name:'下→上・中央',a:[0.50,1.12],b:[0.50,-0.12],lane:54,dir:'v'},
+    {id:6,type:'sweep',name:'下→上・右',a:[0.84,1.12],b:[0.84,-0.12],lane:54,dir:'v'},
+    {id:7,type:'sweep',name:'左→右・上',a:[-0.12,0.20],b:[1.12,0.20],lane:54,dir:'h'},
+    {id:8,type:'sweep',name:'左→右・中央',a:[-0.12,0.50],b:[1.12,0.50],lane:54,dir:'h'},
+    {id:9,type:'sweep',name:'左→右・下',a:[-0.12,0.80],b:[1.12,0.80],lane:54,dir:'h'},
+    {id:10,type:'sweep',name:'右→左・上',a:[1.12,0.20],b:[-0.12,0.20],lane:54,dir:'h'},
+    {id:11,type:'sweep',name:'右→左・中央',a:[1.12,0.50],b:[-0.12,0.50],lane:54,dir:'h'},
+    {id:12,type:'sweep',name:'右→左・下',a:[1.12,0.80],b:[-0.12,0.80],lane:54,dir:'h'},
+
+    // 斜め
+    {id:13,type:'sweep',name:'斜め↘・左上→右下',a:[-0.10,0.12],b:[1.10,0.88],lane:58,dir:'d'},
+    {id:14,type:'sweep',name:'斜め↗・左下→右上',a:[-0.10,0.88],b:[1.10,0.12],lane:58,dir:'d'},
+    {id:15,type:'sweep',name:'斜め↙・右上→左下',a:[1.10,0.12],b:[-0.10,0.88],lane:58,dir:'d'},
+    {id:16,type:'sweep',name:'斜め↖・右下→左上',a:[1.10,0.88],b:[-0.10,0.12],lane:58,dir:'d'},
+
+    // 変則単発
+    {id:17,type:'sweep',name:'中央落下・細',a:[0.50,-0.12],b:[0.50,1.12],lane:32,dir:'v'},
+    {id:18,type:'sweep',name:'中央横断・細',a:[-0.12,0.50],b:[1.12,0.50],lane:32,dir:'h'},
+    {id:19,type:'sweep',name:'左端えぐり',a:[-0.12,0.10],b:[0.42,0.90],lane:44,dir:'d'},
+    {id:20,type:'sweep',name:'右端えぐり',a:[1.12,0.10],b:[0.58,0.90],lane:44,dir:'d'},
+
+    // 2連撃：1本終わってすぐ2本目が来る
+    {id:21,type:'double',name:'縦2連・左→中央',parts:[
+      {a:[0.18,-0.12],b:[0.18,1.12],lane:48},
+      {a:[0.50,1.12],b:[0.50,-0.12],lane:48}
+    ]},
+    {id:22,type:'double',name:'縦2連・中央→右',parts:[
+      {a:[0.50,-0.12],b:[0.50,1.12],lane:48},
+      {a:[0.82,1.12],b:[0.82,-0.12],lane:48}
+    ]},
+    {id:23,type:'double',name:'横2連・上→下',parts:[
+      {a:[-0.12,0.22],b:[1.12,0.22],lane:48},
+      {a:[1.12,0.78],b:[-0.12,0.78],lane:48}
+    ]},
+    {id:24,type:'double',name:'横2連・下→中央',parts:[
+      {a:[1.12,0.82],b:[-0.12,0.82],lane:48},
+      {a:[-0.12,0.50],b:[1.12,0.50],lane:48}
+    ]},
+
+    // X攻撃：2本の斜め線が短い間隔で来る
+    {id:25,type:'double',name:'X斬り・右下→左上',parts:[
+      {a:[-0.08,0.10],b:[1.08,0.90],lane:44},
+      {a:[1.08,0.10],b:[-0.08,0.90],lane:44}
+    ]},
+    {id:26,type:'double',name:'X斬り・逆順',parts:[
+      {a:[1.08,0.10],b:[-0.08,0.90],lane:44},
+      {a:[-0.08,0.10],b:[1.08,0.90],lane:44}
+    ]},
+
+    // ジグザグ：一方向に避け続けるだけでは回避しにくい
+    {id:27,type:'polyline',name:'ジグザグ・右振り',points:[[-0.12,0.18],[0.38,0.82],[0.72,0.24],[1.12,0.78]],lane:50},
+    {id:28,type:'polyline',name:'ジグザグ・左振り',points:[[1.12,0.18],[0.62,0.82],[0.28,0.24],[-0.12,0.78]],lane:50},
+
+    // ファン：上から3本を時間差で落とす
+    {id:29,type:'fan',name:'上空3本・左→右',parts:[
+      {a:[0.16,-0.12],b:[0.16,1.12],lane:40},
+      {a:[0.50,-0.12],b:[0.50,1.12],lane:40},
+      {a:[0.84,-0.12],b:[0.84,1.12],lane:40}
+    ]},
+    {id:30,type:'fan',name:'横3本・上→下',parts:[
+      {a:[-0.12,0.20],b:[1.12,0.20],lane:40},
+      {a:[-0.12,0.50],b:[1.12,0.50],lane:40},
+      {a:[-0.12,0.80],b:[1.12,0.80],lane:40}
+    ]},
+
+    // 追尾ではなく「狙い予告→固定点へ突進」。避けると攻撃が空振りする。
+    {id:31,type:'dashTarget',name:'右上から急襲',a:[1.08,0.08],target:[0.58,0.38],lane:46},
+    {id:32,type:'dashTarget',name:'右中央から急襲',a:[1.08,0.50],target:[0.58,0.50],lane:46},
+    {id:33,type:'dashTarget',name:'右下から急襲',a:[1.08,0.92],target:[0.58,0.62],lane:46},
+    {id:34,type:'dashTarget',name:'左上から急襲',a:[-0.08,0.08],target:[0.42,0.38],lane:46},
+    {id:35,type:'dashTarget',name:'左中央から急襲',a:[-0.08,0.50],target:[0.42,0.50],lane:46},
+    {id:36,type:'dashTarget',name:'左下から急襲',a:[-0.08,0.92],target:[0.42,0.62],lane:46},
+
+    // ビーム以外：落下物・円形衝撃波・放射弾・矩形危険域・円形爆発
+    {id:37,type:'fallingOrbs',name:'上空落下弾',points:[0.30,0.50,0.70],radius:34},
+    {id:38,type:'fallingOrbs',name:'上空連続落下弾',points:[0.18,0.38,0.62,0.82],radius:30},
+    {id:39,type:'shockwave',name:'横衝撃波・上段',y:0.28,height:92,from:'left'},
+    {id:40,type:'shockwave',name:'横衝撃波・下段',y:0.72,height:92,from:'right'},
+    {id:41,type:'radial',name:'八方向放射',count:8,radius:0.10},
+    {id:42,type:'radial',name:'六方向放射',count:6,radius:0.08},
+    {id:43,type:'zone',name:'右側危険領域',x:0.78,y:0.50,w:0.36,h:0.72},
+    {id:44,type:'zone',name:'左側危険領域',x:0.22,y:0.50,w:0.36,h:0.72},
+    {id:45,type:'zone',name:'上部危険領域',x:0.50,y:0.20,w:0.78,h:0.30},
+    {id:46,type:'zone',name:'下部危険領域',x:0.50,y:0.80,w:0.78,h:0.30},
+    {id:47,type:'burstTarget',name:'中央爆発',target:[0.50,0.50],radius:0.18},
+    {id:48,type:'burstTarget',name:'左上爆発',target:[0.25,0.25],radius:0.16},
+    {id:49,type:'burstTarget',name:'右下爆発',target:[0.75,0.75],radius:0.16},
+    {id:50,type:'crossSweep',name:'十字急襲',verticalX:0.50,horizontalY:0.50,lane:42},
+    {id:51,type:'cornerStrike',name:'四隅連撃',corners:[[0.08,0.08],[0.92,0.08],[0.92,0.92],[0.08,0.92]],radius:0.11}
+  ];
+
+  function chooseAttackPattern(){
+    const pool=attackPatterns.filter(p=>p.id!==enemyAttack.lastPatternId);
+    return pool[Math.floor(Math.random()*pool.length)] || attackPatterns[0];
+  }
+
+  function difficultyFactor(now){
+    const elapsed=Math.max(0,now-(enemyAttack.gameStartT||now));
+    return clamp(elapsed/90000,0,1);
+  }
+
+  function beginEnemyAttack(now){
+    if(!calibration.trained || calibration.active || enemyAttack.state!=='idle') return;
+    const pick=chooseAttackPattern();
+    const d=difficultyFactor(now);
+    enemyAttack.pattern=pick;
+    enemyAttack.lastPatternId=pick.id;
+    enemyAttack.startT=now;
+    enemyAttack.sweepStartT=0;
+    enemyAttack.hit=false;
+    enemyAttack.activeStep=0;
+    enemyAttack.difficulty=d;
+    enemyAttack.sweepDuration=Math.max(420,Math.round((pick.type==='double'||pick.type==='fan'||pick.type==='cornerStrike'?760:820)*(1-d*0.34)));
+    enemyAttack.label=pick.name;
+    enemyAttack.state='warning';
+    enemyAttack.attacksStarted++;
+  }
+
+  function attackPointFor(p, u){
+    const a={x:p.a[0]*canvas.width,y:p.a[1]*canvas.height};
+    const b={x:(p.b||p.target||p.a)[0]*canvas.width,y:(p.b||p.target||p.a)[1]*canvas.height};
+    return {x:lerp(a.x,b.x,u),y:lerp(a.y,b.y,u),a,b};
+  }
+
+  function distPointToSegment(pt,a,b){
+    const vx=b.x-a.x, vy=b.y-a.y;
+    const len2=vx*vx+vy*vy;
+    if(!len2) return Math.hypot(pt.x-a.x,pt.y-a.y);
+    const t=clamp(((pt.x-a.x)*vx+(pt.y-a.y)*vy)/len2,0,1);
+    const q={x:a.x+vx*t,y:a.y+vy*t};
+    return Math.hypot(pt.x-q.x,pt.y-q.y);
+  }
+
+  function currentAttackSegments(p, u, now){
+    if(!p) return [];
+    if(p.type==='sweep' || p.type==='dashTarget'){
+      const q=attackPointFor(p,u);
+      return [{a:q.a,b:q,width:p.lane||48}];
+    }
+    if(p.type==='double'){
+      const partCount=p.parts.length;
+      const scaled=u*partCount;
+      const idx=Math.min(partCount-1,Math.floor(scaled));
+      const local=clamp(scaled-idx,0,1);
+      const part=p.parts[idx];
+      const q=attackPointFor(part,local);
+      return [{a:q.a,b:q,width:part.lane||48}];
+    }
+    if(p.type==='fan'){
+      const partCount=p.parts.length;
+      const scaled=u*partCount;
+      const idx=Math.min(partCount-1,Math.floor(scaled));
+      const local=clamp(scaled-idx,0,1);
+      const part=p.parts[idx];
+      const q=attackPointFor(part,local);
+      return [{a:q.a,b:q,width:part.lane||40}];
+    }
+    if(p.type==='polyline'){
+      const pts=p.points;
+      const segs=Math.max(1,pts.length-1);
+      const scaled=u*segs;
+      const idx=Math.min(segs-1,Math.floor(scaled));
+      const local=clamp(scaled-idx,0,1);
+      const part={a:pts[idx],b:pts[idx+1]};
+      const q=attackPointFor(part,local);
+      return [{a:q.a,b:q,width:p.lane||48}];
+    }
+    if(p.type==='crossSweep'){
+      const v=attackPointFor({a:[p.verticalX,-0.12],b:[p.verticalX,1.12]},u);
+      const h=attackPointFor({a:[-0.12,p.horizontalY],b:[1.12,p.horizontalY]},clamp(u*1.15,0,1));
+      return [{a:v.a,b:v,width:p.lane||42},{a:h.a,b:h,width:p.lane||42}];
+    }
+    return [];
+  }
+
+  function attackPointDistance(pt,point){ return Math.hypot(pt.x-point.x,pt.y-point.y); }
+
+  function circleHitsChest(cx,cy,r,chest){ return attackPointDistance(chest,{x:cx,y:cy}) <= r; }
+
+  function zoneHitsChest(zone,chest,w,h){
+    const zx=zone.x*w, zy=zone.y*h, zw=zone.w*w, zh=zone.h*h;
+    return chest.x>=zx-zw/2 && chest.x<=zx+zw/2 && chest.y>=zy-zh/2 && chest.y<=zy+zh/2;
+  }
+
+  function specialAttackHitsChest(p,u,chest,w,h){
+    if(!p||!chest) return false;
+    if(p.type==='fallingOrbs'){
+      const hitY=h*(u*1.18-0.09);
+      return p.points.some(x=>circleHitsChest(x*w,hitY,p.radius,chest));
+    }
+    if(p.type==='shockwave'){
+      const y=p.y*h, band=p.height*0.5;
+      return Math.abs(chest.y-y)<=band && ((p.from==='left'&&u>0.72)||(p.from==='right'&&u>0.72));
+    }
+    if(p.type==='radial'){
+      const cx=w*0.5, cy=h*0.5;
+      const r=h*(p.radius+u*0.72);
+      const d=Math.hypot(chest.x-cx,chest.y-cy);
+      return Math.abs(d-r)<Math.max(26,h*0.045) && u>0.12;
+    }
+    if(p.type==='zone') return zoneHitsChest(p,chest,w,h) && u>0.56;
+    if(p.type==='burstTarget'){
+      const tx=p.target[0]*w, ty=p.target[1]*h;
+      const r=p.radius*w*(0.45+0.95*u);
+      return circleHitsChest(tx,ty,r,chest) && u>0.45;
+    }
+    if(p.type==='cornerStrike'){
+      const idx=Math.min(p.corners.length-1,Math.floor(u*p.corners.length));
+      const c=p.corners[idx];
+      const r=p.radius*Math.min(w,h)*(u<0.5?0.7:1.15);
+      return circleHitsChest(c[0]*w,c[1]*h,r,chest);
+    }
+    if(p.type==='crossSweep') return currentAttackSegments(p,u).some(seg=>distPointToSegment(chest,seg.a,seg.b)<Math.max(30,seg.width*0.48));
+    return false;
+  }
+
+  function drawSpecialAttack(p,u,now){
+    const w=canvas.width,h=canvas.height;
+    if(p.type==='fallingOrbs'){
+      const y=h*(u*1.18-0.09);
+      p.points.forEach((x,i)=>{
+        const yy=y-h*0.08*i;
+        ctx.beginPath();ctx.arc(x*w,yy,p.radius,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,80,55,.95)';ctx.shadowColor='rgba(255,40,20,.9)';ctx.shadowBlur=22;ctx.fill();
+        ctx.beginPath();ctx.arc(x*w,yy,p.radius*0.42,0,Math.PI*2);ctx.fillStyle='#fff6ec';ctx.fill();
+      });
+    }else if(p.type==='shockwave'){
+      const y=p.y*h, sweepX=p.from==='left'?u*w:(1-u)*w;
+      ctx.fillStyle='rgba(255,48,58,.82)';ctx.shadowColor='rgba(255,35,45,.9)';ctx.shadowBlur=25;
+      ctx.fillRect(sweepX-45,y-p.height/2,90,p.height);
+    }else if(p.type==='radial'){
+      const cx=w*.5,cy=h*.5; const r=h*(p.radius+u*.72);
+      ctx.strokeStyle='rgba(255,45,55,.95)';ctx.lineWidth=28;ctx.shadowColor='rgba(255,35,45,.9)';ctx.shadowBlur=18;
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+    }else if(p.type==='zone'){
+      const zx=p.x*w,zy=p.y*h,zw=p.w*w,zh=p.h*h;
+      ctx.fillStyle=`rgba(255,35,45,${0.24+0.30*u})`;ctx.fillRect(zx-zw/2,zy-zh/2,zw,zh);
+      ctx.strokeStyle='rgba(255,110,110,.96)';ctx.lineWidth=5;ctx.strokeRect(zx-zw/2,zy-zh/2,zw,zh);
+    }else if(p.type==='burstTarget'){
+      const tx=p.target[0]*w,ty=p.target[1]*h,r=p.radius*w*(0.45+0.95*u);
+      ctx.beginPath();ctx.arc(tx,ty,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,55,60,.95)';ctx.lineWidth=12;ctx.shadowColor='rgba(255,35,45,.95)';ctx.shadowBlur=28;ctx.stroke();
+      ctx.beginPath();ctx.arc(tx,ty,Math.max(8,12+u*18),0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    }else if(p.type==='cornerStrike'){
+      const idx=Math.min(p.corners.length-1,Math.floor(u*p.corners.length)); const c=p.corners[idx];
+      const r=p.radius*Math.min(w,h)*(0.55+u*0.85);
+      ctx.beginPath();ctx.arc(c[0]*w,c[1]*h,r,0,Math.PI*2);ctx.fillStyle='rgba(255,40,45,.30)';ctx.fill();ctx.strokeStyle='rgba(255,75,80,.95)';ctx.lineWidth=6;ctx.stroke();
+    }
+  }
+
+  function applyPlayerDamage(now){
+    if(now<player.invulnerableUntil) return;
+    player.hp=Math.max(0,player.hp-enemyAttack.damage);
+    player.damageFlash=now+420;
+    player.invulnerableUntil=now+850;
+    enemyAttack.flashUntil=now+260;
+    els.playerHp.textContent=`${player.hp} / ${player.maxHp}`;
+    if(els.playerHpBar) els.playerHpBar.style.width=(player.hp/player.maxHp*100)+'%';
+    els.status.textContent=player.hp<=0?'ダウン！':'被弾！';
+  }
+
+  function updateEnemyAttack(now){
+    if(!calibration.trained || calibration.active) return;
+    if(enemyAttack.state==='idle'){
+      if(now>=(enemyAttack.nextAttackT||0)) beginEnemyAttack(now);
+      return;
+    }
+    if(enemyAttack.state==='warning'){
+      // 3秒固定予告。最後の0.8秒だけ点滅を強くする。
+      if(now-enemyAttack.startT>=3000){
+        enemyAttack.state='active';
+        enemyAttack.sweepStartT=now;
+      }
+      return;
+    }
+    if(enemyAttack.state==='active'){
+      const p=enemyAttack.pattern;
+      const duration=enemyAttack.sweepDuration * (p && (p.type==='double'||p.type==='fan') ? (p.parts.length*0.78) : (p.type==='cornerStrike'?1.15:1));
+      const u=clamp((now-enemyAttack.sweepStartT)/duration,0,1);
+      if(!enemyAttack.hit && chestMarker && p){
+        const w=canvas.width,h=canvas.height;
+        const chest={x:(1-chestMarker.x)*w,y:chestMarker.y*h};
+        const segs=currentAttackSegments(p,u,now);
+        const touching=specialAttackHitsChest(p,u,chest,w,h) || segs.some(seg=>distPointToSegment(chest,seg.a,seg.b) < Math.max(30,seg.width*0.48));
+        if(touching){
+          enemyAttack.hit=true;
+          applyPlayerDamage(now);
+        }
+      }
+      if(u>=1){
+        enemyAttack.comboIndex++;
+        enemyAttack.state='idle';
+        // 同じパターン連続禁止。難易度に応じて次の間隔を短くする。
+        const d=enemyAttack.difficulty;
+        const rest=Math.max(100,Math.round(1500-d*850+Math.random()*650));
+        enemyAttack.nextAttackT=now+rest;
+      }
+    }
+  }
+
+  function drawEnemyAttack(now){
+    if(!calibration.trained || calibration.active || !enemyAttack.pattern) return;
+    const p=enemyAttack.pattern,w=canvas.width,h=canvas.height;
+    ctx.save();
+
+    if(enemyAttack.state==='warning'){
+      const remain=Math.max(0,3000-(now-enemyAttack.startT));
+      const pulse=0.13+0.20*(0.5+0.5*Math.sin(now*0.022));
+      const urgent=remain<850;
+      const segs=(p.type==='polyline')
+        ? p.points.slice(0,-1).map((_,i)=>({a:{x:p.points[i][0]*w,y:p.points[i][1]*h},b:{x:p.points[i+1][0]*w,y:p.points[i+1][1]*h},width:p.lane||50}))
+        : (p.type==='double'||p.type==='fan')
+          ? p.parts.map(part=>({a:{x:part.a[0]*w,y:part.a[1]*h},b:{x:part.b[0]*w,y:part.b[1]*h},width:part.lane||44}))
+          : [(() => { const a=p.a,b=p.b||p.target; return {a:{x:a[0]*w,y:a[1]*h},b:{x:b[0]*w,y:b[1]*h},width:p.lane||50}; })()];
+
+      for(const seg of segs){
+        ctx.strokeStyle=`rgba(255,30,40,${urgent?0.88+pulse:0.52+pulse})`;
+        ctx.lineWidth=(seg.width||48)*(urgent?1.18:1.0);
+        ctx.setLineDash([22,14]);
+        ctx.beginPath();ctx.moveTo(seg.a.x,seg.a.y);ctx.lineTo(seg.b.x,seg.b.y);ctx.stroke();
+      }
+      if(['fallingOrbs','shockwave','radial','zone','burstTarget','cornerStrike'].includes(p.type)){
+        ctx.setLineDash([]);
+        ctx.globalAlpha=0.38+0.30*(1-remain/3000);
+        drawSpecialAttack(p,0.18,now);
+        ctx.globalAlpha=1;
+      }
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,28,38,.97)';
+      ctx.textAlign='center';ctx.font='900 25px system-ui,sans-serif';
+      ctx.fillText('⚠ '+enemyAttack.label,w*0.50,h*0.085);
+      ctx.font='900 34px system-ui,sans-serif';
+      ctx.fillText((remain/1000).toFixed(1)+'s',w*0.50,h*0.15);
+      ctx.font='800 15px system-ui,sans-serif';
+      ctx.fillStyle='rgba(255,220,220,.95)';
+      ctx.fillText('赤いラインに触れないで！',w*0.50,h*0.205);
+    }else if(enemyAttack.state==='active'){
+      const duration=enemyAttack.sweepDuration * (p.type==='double'||p.type==='fan' ? p.parts.length*0.78 : 1);
+      const u=clamp((now-enemyAttack.sweepStartT)/duration,0,1);
+      const segs=currentAttackSegments(p,u,now);
+      for(const seg of segs){
+        ctx.strokeStyle='rgba(255,30,40,.96)';
+        ctx.lineWidth=seg.width||48;
+        ctx.shadowColor='rgba(255,25,35,.95)';ctx.shadowBlur=24;
+        ctx.beginPath();ctx.moveTo(seg.a.x,seg.a.y);ctx.lineTo(seg.b.x,seg.b.y);ctx.stroke();
+      }
+      const heads=segs;
+      for(const seg of heads){
+        ctx.beginPath();ctx.arc(seg.b.x,seg.b.y,(seg.width||48)*0.36,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+        ctx.beginPath();ctx.arc(seg.b.x,seg.b.y,(seg.width||48)*0.60,0,Math.PI*2);ctx.strokeStyle='rgba(255,75,80,.8)';ctx.lineWidth=4;ctx.stroke();
+      }
+      if(p.type==='fallingOrbs'||p.type==='shockwave'||p.type==='radial'||p.type==='zone'||p.type==='burstTarget'||p.type==='cornerStrike') drawSpecialAttack(p,u,now);
+    }
+    if(enemyAttack.flashUntil>now){
+      ctx.fillStyle='rgba(255,35,35,.10)';
+      ctx.fillRect(0,0,w,h);
+    }
+    ctx.restore();
+  }
+
+
+  function drawMonster(now){
+    const w=canvas.width,h=canvas.height;
+    let sx=0;
+    if(monster.shake>now) sx=Math.sin(now*0.12)*8;
+    const x=w*0.78+sx, y=h*0.54;
+    ctx.save();
+    ctx.translate(x,y);
+    const hit=monster.hitFlash>now;
+    if(monster.defeated){ ctx.globalAlpha=Math.max(0,(monster.defeatT+900-now)/900); }
+    ctx.fillStyle=hit?'#ffffff':'#8ce36d';
+    ctx.strokeStyle='#121820'; ctx.lineWidth=5;
+    if(monster.kind===0){
+      ctx.beginPath(); ctx.moveTo(-62,15); ctx.quadraticCurveTo(-58,-58,0,-70); ctx.quadraticCurveTo(58,-58,62,15); ctx.quadraticCurveTo(42,58,0,62); ctx.quadraticCurveTo(-42,58,-62,15); ctx.fill(); ctx.stroke();
+    }else if(monster.kind===1){
+      ctx.fillStyle=hit?'#ffffff':'#7f8791';
+      ctx.beginPath(); ctx.roundRect(-44,-48,88,108,18); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-42,-40);ctx.lineTo(-88,-78);ctx.lineTo(-55,-18);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(42,-40);ctx.lineTo(88,-78);ctx.lineTo(55,-18);ctx.closePath();ctx.fill();ctx.stroke();
+    }else{
+      ctx.fillStyle=hit?'#ffffff':'#c95b53';
+      ctx.beginPath();ctx.ellipse(0,4,62,52,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-35,-28);ctx.lineTo(-75,-75);ctx.lineTo(-52,-8);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(35,-28);ctx.lineTo(75,-75);ctx.lineTo(52,-8);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#f4d24a';ctx.beginPath();ctx.arc(62,5,12,0,Math.PI*2);ctx.fill();ctx.stroke();
+    }
+    ctx.fillStyle='#1b1520';
+    ctx.beginPath();ctx.arc(-19,-4,7,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(19,-4,7,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+
+    monster.damageTexts=monster.damageTexts.filter(d=>now-d.t<d.life);
+    ctx.save();ctx.textAlign='center';ctx.font='800 26px system-ui,sans-serif';
+    for(const d of monster.damageTexts){
+      const t=(now-d.t)/d.life;
+      ctx.fillStyle=`rgba(255,230,90,${1-t})`;
+      ctx.fillText('-'+d.amount,w*0.78,d.y*h-t*55);
+      d.y+=0.0002;
+    }
+    ctx.restore();
+  }
+
+  function tutorialTip(index){
+    return [
+      '左腕をまっすぐ前へ。肩を残して、拳だけ素早く伸ばします。',
+      '右腕をまっすぐ前へ。1発だけ、素早く突き出します。',
+      '左腕を横へ回すフック。肘を少し曲げたまま横方向へ。',
+      '右腕を横へ回すフック。1発だけ、横へ鋭く振ります。',
+      '拳を下から上へ。胸の前からあご方向へアッパーします。'
+    ][index] || '自然に1発だけパンチしてください。';
+  }
+
+  function drawCalibrationOverlay(now){
+    if(!calibration.active) return;
+    const w=canvas.width, h=canvas.height;
+    const remain=Math.max(0, calibration.stepLimitMs-(now-calibration.stepStartT));
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,.58)';
+    ctx.fillRect(0,0,w,h);
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillStyle='#7fd4ff';
+    ctx.font=`900 ${Math.max(12,w*0.018)}px system-ui,sans-serif`;
+    ctx.fillText('TUTORIAL  •  5種類のパンチを登録',w/2,h*0.16);
+    ctx.fillStyle='#ffffff';
+    ctx.font=`850 ${Math.max(22,w*0.040)}px system-ui,sans-serif`;
+    ctx.fillText(calibration.labels[calibration.index]||'',w/2,h*0.28);
+    ctx.font=`700 ${Math.max(16,w*0.028)}px system-ui,sans-serif`;
+    ctx.fillStyle='#ffec70';
+    ctx.fillText(`${calibration.index+1}/5   ${Math.max(0,remain/1000).toFixed(1)}秒`,w/2,h*0.37);
+    ctx.font=`650 ${Math.max(12,w*0.020)}px system-ui,sans-serif`;
+    ctx.fillStyle='#ffffff';
+    ctx.fillText(tutorialTip(calibration.index),w/2,h*0.46);
+    ctx.fillStyle='rgba(255,255,255,.76)';
+    ctx.fillText('候補を最大5本集めたら、あとで一番きれいな1本を選びます。',w/2,h*0.53);
+    ctx.fillStyle='#a6d7ff';
+    ctx.fillText(`候補 ${calibration.candidates.length}/${calibration.maxCandidates}`,w/2,h*0.61);
+    ctx.fillStyle='rgba(255,255,255,.60)';
+    ctx.font=`600 ${Math.max(10,w*0.015)}px system-ui,sans-serif`;
+    ctx.fillText('順番：左ストレート → 右ストレート → 左フック → 右フック → アッパー',w/2,h*0.68);
+    ctx.restore();
+  }
+
+  function draw(lm, scores){
+    canvas.width=video.videoWidth||640;
+    canvas.height=video.videoHeight||480;
+    updateRecordCanvas();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const now=performance.now();
+    if(!lm){
+      updateEnemyAttack(now);
+      drawMonster(now);
+      drawEnemyAttack(now);
+      return;
+    }
+
+    const pts=[11,12,13,14,15,16,23,24];
+    ctx.lineWidth=4;
+    ctx.strokeStyle="rgba(80,180,255,.8)";
+    const links=[[11,13],[13,15],[12,14],[14,16],[11,12],[11,23],[12,24],[23,24]];
+    links.forEach(([a,b])=>{
+      const A=lm[a],B=lm[b];
+      if(!A||!B)return;
+      ctx.beginPath();
+      ctx.moveTo((1-A.x)*canvas.width,A.y*canvas.height);
+      ctx.lineTo((1-B.x)*canvas.width,B.y*canvas.height);
+      ctx.stroke();
+    });
+    pts.forEach(i=>{
+      const p=lm[i];
+      ctx.beginPath();
+      ctx.arc((1-p.x)*canvas.width,p.y*canvas.height,6,0,Math.PI*2);
+      ctx.fillStyle="white";
+      ctx.fill();
+    });
+
+    ["left","right"].forEach(side=>{
+      const arm=getArm(lm,side); if(!arm)return;
+      const s=scores[side].score;
+      if(s>.55){
+        const p=arm.wrist;
+        ctx.beginPath();
+        ctx.arc((1-p.x)*canvas.width,p.y*canvas.height,18+s*20,0,Math.PI*2);
+        ctx.strokeStyle="rgba(50,240,140,.9)";
+        ctx.stroke();
+      }
+    });
+
+    // 姿勢を検出している間、胸の中心に⭕を表示して追従。
+    drawChestMarker(lm, true, now);
+    updateEnemyAttack(now);
+    drawMonster(now);
+    drawEnemyAttack(now);
+    drawCalibrationOverlay(now);
+
+    if(player.damageFlash>0){
+      ctx.save();
+      ctx.fillStyle=`rgba(255,0,25,${Math.min(0.28,player.damageFlash/900)})`;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.restore();
+    }
+  }
+
+  function updateHUD(scores){
+    const best=Math.max(scores.left.score,scores.right.score);
+    if(best>0){
+      const pct=Math.round(best*100);
+      els.confidence.textContent=pct+'%';
+      document.getElementById('scoreBar').style.width=pct+'%';
+    }else if(calibration.active){
+      els.confidence.textContent='—';
+      document.getElementById('scoreBar').style.width='0%';
+    }else if(!calibration.trained){
+      els.confidence.textContent='—';
+      document.getElementById('scoreBar').style.width='0%';
+    }else{
+      document.getElementById('scoreBar').style.width='0%';
+      if(calibration.trained) els.scoreText.textContent='戦闘中';
+    }
+    if(calibration.active){
+      els.scoreText.textContent=`${calibration.labels[calibration.index]||''} の候補を収集中… ${calibration.candidates.length}/${calibration.maxCandidates}`;
+    } else if(calibration.review){
+      els.scoreText.textContent='候補を見て一番良いパンチを選択してください';
+    }
+  }
+
+  async function onResults(results){
+    if(!running) return;
+    const lm=results.poseLandmarks;
+    if(!lm){
+      els.poseStatus.textContent="姿勢未検出";
+      els.scoreBar.style.width="0%";
+      if(!calibration.trained) els.confidence.textContent="—";
+      chestMarker = null;
+      chestMarkerVelocity={x:0,y:0};
+      chestMarkerLastT=0;
+      draw(null,{left:{score:0},right:{score:0}});
+      return;
+    }
+
+    els.poseStatus.textContent="姿勢検出中";
+    const now=performance.now();
+    const scores={
+      left:detectArm(lm,"left",now),
+      right:detectArm(lm,"right",now)
+    };
+
+    draw(lm,scores);
+    updateHUD(scores);
+  }
+
+  const pose = new Pose({
+    locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+  });
+
+  pose.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    minDetectionConfidence: 0.62,
+    minTrackingConfidence: 0.62
+  });
+  pose.onResults(onResults);
+
+  async function loop(){
+    if(!running) return;
+    if(video.readyState>=2 && !poseBusy){
+      poseBusy=true;
+      try{
+        await pose.send({image:video});
+        poseErrorCount=0;
+      }catch(e){
+        poseErrorCount++;
+        poseLastErrorT=performance.now();
+        const msg=e && (e.message || e.name) ? `${e.name||'Error'}: ${e.message||''}` : String(e||'Error');
+        console.warn('Pose frame error:', msg);
+        if(poseErrorCount>=3){
+          els.poseStatus.textContent='姿勢処理を再試行中…';
+          // 一時的なWebGL/Frameエラーでループ全体を止めない。次フレームから自動復帰。
+          poseErrorCount=0;
+        }
+      }finally{
+        poseBusy=false;
+      }
+    }
+    raf=requestAnimationFrame(loop);
+  }
+
+  async function start(){
+    if(running)return;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({
+        video:{facingMode:"user",width:{ideal:1280},height:{ideal:720}},
+        audio:false
+      });
+      video.srcObject=stream;
+      await video.play();
+      running=true;
+      if(els.startScreen) els.startScreen.style.display="none";
+      poseBusy=false;
+      poseErrorCount=0;
+      poseLastErrorT=0;
+      els.start.disabled=true;
+      els.stop.disabled=false;
+      els.calibrate.disabled=true;
+      closeCalibrationReview();
+      resetArm(arms.left); resetArm(arms.right);
+      const resumed=loadPersistentTraining();
+      if(resumed){
+        calibration.active=false;
+        calibration.review=false;
+        els.status.textContent='保存済みパンチデータを読み込み中';
+        els.scoreText.textContent='前回のチュートリアル結果をそのまま使用します';
+      }else{
+        startCalibration(performance.now());
+      }
+      chestMarker = null;
+      chestMarkerVelocity={x:0,y:0};
+      chestMarkerLastT=0;
+      resetPlayer();
+      enemyAttack.state="idle";
+      enemyAttack.gameStartT=performance.now();
+      enemyAttack.attacksStarted=0;
+      enemyAttack.lastPatternId=-1;
+      enemyAttack.nextAttackT=performance.now()+2600;
+      if(monster.hp<=0 || monster.defeated) spawnMonster();
+      loop();
+    }catch(e){
+      console.error(e);
+      els.status.textContent="カメラを開始できません";
+      if(els.startScreen) els.startScreen.style.display="flex";
+      alert("カメラを使用できませんでした。ブラウザのカメラ許可と、安全な接続(HTTPS/localhost)を確認してください。");
+    }
+  }
+
+  function stop(){
+    running=false;
+    cancelAnimationFrame(raf);
+    poseBusy=false;
+    poseErrorCount=0;
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    stream=null;
+    if(recordStream){ try{recordStream.getTracks().forEach(t=>t.stop());}catch(_e){} }
+    recordStream=null;
+    els.start.disabled=false;
+    els.stop.disabled=true;
+    els.calibrate.disabled=true;
+    els.status.textContent="停止中";
+    els.poseStatus.textContent="姿勢未検出";
+    resetArm(arms.left); resetArm(arms.right);
+    if(candidateRecorder){ try{candidateRecorder.stop();}catch(_e){} candidateRecorder=null; candidateRecorderChunks=[]; }
+    closeCalibrationReview();
+    calibration.active=false;
+    calibration.failed=false;
+    calibration.index=calibration.trained?5:0;
+    if(!calibration.trained) calibration.profiles=[];
+    calibration.bestRejected=null;
+    calibration.selectedCandidate=null;
+    calibration.candidateCount=0;
+    calibration.stepStartT=0;
+    els.confidence.textContent="0%";
+    els.scoreBar.style.width="0%";
+    updateCalibrationText();
+    chestMarker = null;
+    enemyAttack.state="idle";
+    enemyAttack.nextAttackT=0;
+    calibration.eventBusyUntil=0;
+  }
+
+  function calibrate(){ /* 初回学習はカメラ開始時に自動実行するため手動実行しない */ }
+
+  recordVisit();
+  if(hasPersistentTraining()){
+    visitData.tutorialCompleted=true;
+    els.startGame.textContent='ゲーム開始（保存データを使用）';
+    els.startScreen.querySelector('.start-note').textContent='前回までの5種類パンチデータをそのまま使用します。';
+  }else{
+    els.startGame.textContent='チュートリアル開始';
+    els.startScreen.querySelector('.start-note').textContent='初回はカメラを使わず、3D手本を見てからパンチ登録を行います。';
+  }
+  spawnMonster();
+  updateCalibrationText();
+
+  els.start.addEventListener("click",start);
+  els.startGame.addEventListener("click",()=>{
+    if(hasPersistentTraining()){ els.startScreen.style.display="none"; start(); }
+    else { startTutorial(); }
+  });
+  els.tutorialNext.addEventListener("click",async()=>{
+    const last=tutorialState.index===tutorialMoves.length-1;
+    const elapsed=performance.now()-tutorialState.startT;
+    if(elapsed<500) return;
+    if(last){ finishTutorialAndStart(); return; }
+    tutorialState.index=Math.min(tutorialMoves.length-1,tutorialState.index+1);
+    tutorialState.startT=performance.now(); tutorialState.lastFrameT=performance.now();
+    updateTutorialUI();
+    await showTutorialFBX(tutorialState.index);
+  });
+  els.tutorialSkip.addEventListener("click",skipTutorialAndStart);
+  els.exitGame.addEventListener("click",()=>{ stop(); els.startScreen.style.display="flex"; });
+  els.stop.addEventListener("click",stop);
+  els.calUseSelected.addEventListener("click",()=>saveSelectedCalibration(performance.now()));
+  window.addEventListener("beforeunload",stop);
+})();
+</script>
+</body>
+</html>
