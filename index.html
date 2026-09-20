@@ -298,7 +298,8 @@ window.FBXLoader = FBXLoader;
     tutorialState.camera.lookAt(0,1.25,0);
     tutorialState.renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
     tutorialState.renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
-    tutorialState.renderer.setClearColor(0x000000,0);
+    tutorialState.renderer.setClearColor(0x07101a,0);
+    tutorialState.renderer.outputColorSpace=THREE.SRGBColorSpace;
     tutorialState.loader=new window.FBXLoader();
     const hemi=new THREE.HemisphereLight(0x9bc6ff,0x182231,2.2); tutorialState.scene.add(hemi);
     const key=new THREE.DirectionalLight(0xffffff,2.6); key.position.set(2.4,4.5,3.8); tutorialState.scene.add(key);
@@ -327,20 +328,37 @@ window.FBXLoader = FBXLoader;
 
   function frameFBXObject(obj){
     const THREE=window.THREE;
+    obj.updateMatrixWorld(true);
     const box=new THREE.Box3().setFromObject(obj);
     if(box.isEmpty()) return;
     const size=box.getSize(new THREE.Vector3());
-    const center=box.getCenter(new THREE.Vector3());
     const height=Math.max(size.y,0.001);
+    const maxDim=Math.max(size.x,size.y,size.z,0.001);
     const targetHeight=3.0;
     const scale=targetHeight/height;
-    obj.scale.multiplyScalar(scale);
-    const box2=new THREE.Box3().setFromObject(obj);
-    const center2=box2.getCenter(new THREE.Vector3());
-    obj.position.sub(center2);
-    obj.position.y += targetHeight*0.50;
-  }
+    obj.scale.setScalar(scale);
+    obj.updateMatrixWorld(true);
 
+    // 足元を床へ、身体の中心をワールド原点へ配置。
+    const fitted=new THREE.Box3().setFromObject(obj);
+    const center=fitted.getCenter(new THREE.Vector3());
+    obj.position.x-=center.x;
+    obj.position.z-=center.z;
+    obj.position.y-=fitted.min.y;
+    obj.updateMatrixWorld(true);
+
+    // モデルの大きさに合わせてカメラを自動調整。
+    const finalBox=new THREE.Box3().setFromObject(obj);
+    const finalSize=finalBox.getSize(new THREE.Vector3());
+    const finalCenter=finalBox.getCenter(new THREE.Vector3());
+    const halfFov=THREE.MathUtils.degToRad(28/2);
+    const distance=Math.max(3.8,(Math.max(finalSize.x,finalSize.y)*0.62)/Math.tan(halfFov));
+    tutorialState.camera.position.set(0,Math.max(1.25,finalSize.y*0.48),distance);
+    tutorialState.camera.near=0.01;
+    tutorialState.camera.far=Math.max(50,distance*8);
+    tutorialState.camera.lookAt(finalCenter.x,finalCenter.y*0.48,finalCenter.z);
+    tutorialState.camera.updateProjectionMatrix();
+  }
   function loadFBX(url){
     return new Promise((resolve,reject)=>{
       if(tutorialState.loaded.has(url)){ resolve(tutorialState.loaded.get(url).clone(true)); return; }
@@ -368,6 +386,7 @@ window.FBXLoader = FBXLoader;
     initTutorial3D();
     clearTutorialObject();
     els.tutorialAssetStatus.textContent=`${move.file} を読み込み中…`;
+    els.tutorialNext.disabled=true;
     let obj=null;
     try{
       obj=await loadFBX(move.file);
@@ -379,10 +398,19 @@ window.FBXLoader = FBXLoader;
     if(!obj){
       els.tutorialAssetStatus.textContent=`❌ ${move.file} が見つかりません`;
       els.tutorialHint.textContent='HTMLと同じフォルダにFBXを置いてください。';
+      els.tutorialNext.disabled=false;
       return false;
     }
     obj.traverse(o=>{
-      if(o.isMesh){ o.castShadow=false; o.receiveShadow=false; if(o.material) o.material.needsUpdate=true; }
+      if(o.isMesh){
+        o.castShadow=false;
+        o.receiveShadow=false;
+        if(Array.isArray(o.material)){
+          o.material.forEach(m=>{ if(m){m.needsUpdate=true;} });
+        }else if(o.material){
+          o.material.needsUpdate=true;
+        }
+      }
     });
     frameFBXObject(obj);
     tutorialState.currentObject=obj;
@@ -397,6 +425,7 @@ window.FBXLoader = FBXLoader;
     }else{
       tutorialState.currentClips=[];
     }
+    els.tutorialNext.disabled=false;
     return true;
   }
 
@@ -410,11 +439,14 @@ window.FBXLoader = FBXLoader;
     tutorialState.renderer.render(tutorialState.scene,tutorialState.camera);
     els.tutorialProgressBar.style.width=(phase*100).toFixed(1)+'%';
     if(phase>=1){
-      if(tutorialState.index < tutorialMoves.length-1){
-        tutorialState.index++; tutorialState.startT=now; tutorialState.lastFrameT=now; updateTutorialUI(); showTutorialFBX(tutorialState.index);
-      }else{
+      els.tutorialProgressBar.style.width='100%';
+      // 自動では次へ進めない。ユーザーが「次の手本」を押した時だけ進む。
+      if(tutorialState.index===tutorialMoves.length-1){
         els.tutorialNext.textContent='パンチ登録へ進む';
-        els.tutorialFooterText.textContent='4種類のFBX手本は完了。次はカメラをONにして、あなたのパンチ登録へ進みます。';
+        els.tutorialFooterText.textContent='手本を確認しました。準備ができたら「パンチ登録へ進む」を押してください。';
+      }else{
+        els.tutorialNext.textContent='次の手本';
+        els.tutorialFooterText.textContent='この手本は完了。自分のタイミングで「次の手本」を押してください。';
       }
     }
     tutorialState.raf=requestAnimationFrame(renderTutorial);
@@ -431,11 +463,21 @@ window.FBXLoader = FBXLoader;
   }
 
   async function startTutorial(){
-    initTutorial3D();
-    tutorialState.active=true; tutorialState.index=0; tutorialState.startT=performance.now(); tutorialState.lastFrameT=performance.now();
-    els.startScreen.style.display='none'; els.tutorialScreen.classList.add('show');
+    // 先に表示してからWebGLを初期化。display:none中にサイズを測ると
+    // canvasが0x0になってFBXが「見えない」状態になるため。
+    els.startScreen.style.display='none';
+    els.tutorialScreen.classList.add('show');
+    tutorialState.active=true;
+    tutorialState.index=0;
+    tutorialState.startT=performance.now();
+    tutorialState.lastFrameT=performance.now();
     updateTutorialUI();
+    requestAnimationFrame(()=>{
+      initTutorial3D();
+      resizeTutorial3D();
+    });
     await showTutorialFBX(0);
+    resizeTutorial3D();
     if(tutorialState.raf) cancelAnimationFrame(tutorialState.raf);
     tutorialState.raf=requestAnimationFrame(renderTutorial);
   }
@@ -1985,14 +2027,15 @@ window.FBXLoader = FBXLoader;
     else { startTutorial(); }
   });
   els.tutorialNext.addEventListener("click",async()=>{
+    if(els.tutorialNext.disabled) return;
     const last=tutorialState.index===tutorialMoves.length-1;
-    const elapsed=performance.now()-tutorialState.startT;
-    if(elapsed<500) return;
     if(last){ finishTutorialAndStart(); return; }
     tutorialState.index=Math.min(tutorialMoves.length-1,tutorialState.index+1);
-    tutorialState.startT=performance.now(); tutorialState.lastFrameT=performance.now();
+    tutorialState.startT=performance.now();
+    tutorialState.lastFrameT=performance.now();
     updateTutorialUI();
     await showTutorialFBX(tutorialState.index);
+    resizeTutorial3D();
   });
   els.tutorialSkip.addEventListener("click",skipTutorialAndStart);
   els.exitGame.addEventListener("click",()=>{ stop(); els.startScreen.style.display="flex"; });
