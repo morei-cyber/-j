@@ -70,6 +70,7 @@ button:disabled{opacity:.45}
   <button data-index="1">右フック</button>
   <button data-index="2">左ストレート</button>
   <button data-index="3">左フック</button>
+  <button data-index="4">アッパー</button>
   <button id="replay">↻ 再生し直す</button>
   <button id="fit">中央に合わせる</button>
   <div id="status">FBXを読み込み中…</div>
@@ -149,13 +150,15 @@ const FILES=[
   "Migi_straight.fbx",
   "Migi_hook.fbx",
   "Hidari_staright.fbx",
-  "Hidari_hook.fbx"
+  "Hidari_hook.fbx",
+  "Uppercut.fbx"
 ];
 
 const FALLBACKS=[
   [],
   [],
   ["Hidari_straight.fbx"],
+  [],
   []
 ];
 
@@ -459,6 +462,7 @@ animate();
 
 log("起動完了。","OK");
 log("同じフォルダのFBXをfetch → ArrayBuffer → FBXLoader.parse()します。","OK");
+log("アッパーは Uppercut.fbx を使用します。","OK");
 
 // 最初から右ストレートを表示
 loadIndex(0);
