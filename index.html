@@ -101,6 +101,30 @@ th:100%;height:auto;position:absolute;inset:0}
   .tutorial-arrow::after{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:52px solid #ffde65;filter:drop-shadow(0 0 14px rgba(255,204,86,.35))}
   @media(max-width:700px){.tutorial-shell{padding:10px}.tutorial-stage{border-radius:18px}.tutorial-desc{font-size:12px}.tutorial-controls{flex-wrap:wrap}.tutorial-controls-left,.tutorial-controls-right{width:100%}.tutorial-controls button{flex:1}.tutorial-controls .primary{width:100%}.tutorial-note{width:100%;order:3}}
 
+
+  .diag-open{min-width:140px !important;background:#172131 !important;border:1px solid #3b4f6b !important}
+  .diag-panel{position:fixed;inset:0;z-index:250;display:none;background:#03060b;color:#eef4ff;overflow:auto}
+  .diag-panel.show{display:block}
+  .diag-shell{max-width:1200px;margin:0 auto;padding:16px}
+  .diag-head{position:sticky;top:0;z-index:3;background:rgba(3,6,11,.94);backdrop-filter:blur(10px);border-bottom:1px solid #263447;padding:12px 0 14px}
+  .diag-title{font-size:24px;font-weight:950;margin:0 0 5px}
+  .diag-sub{font-size:12px;color:#9eacc0;line-height:1.6}
+  .diag-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .diag-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+  .diag-kpi{border:1px solid #28384c;background:#0b111b;border-radius:12px;padding:10px}
+  .diag-kpi .k{font-size:10px;color:#8495ac;text-transform:uppercase;letter-spacing:.08em}
+  .diag-kpi .v{font-size:18px;font-weight:900;margin-top:3px}
+  .diag-card{border:1px solid #263447;background:#080d15;border-radius:14px;margin-top:10px;overflow:hidden}
+  .diag-card h3{font-size:14px;margin:0;padding:11px 13px;border-bottom:1px solid #1f2a39}
+  .diag-list{padding:10px 12px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto}
+  .diag-row{display:grid;grid-template-columns:110px 86px 1fr;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.035)}
+  .diag-time{color:#6f8199}.diag-cat{color:#77b8ff}.diag-msg{color:#d4deeb}
+  .diag-ok{color:#6ff0ad}.diag-warn{color:#ffd36a}.diag-err{color:#ff7c86}.diag-info{color:#92b8ff}
+  .diag-report{min-height:240px;max-height:480px}
+  .diag-close{position:absolute;right:16px;top:12px}
+  .diag-code{font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c7d2e2;background:#050911;border:1px solid #202e41;border-radius:10px;padding:10px;overflow:auto;white-space:pre-wrap}
+  @media(max-width:760px){.diag-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.diag-row{grid-template-columns:76px 68px 1fr;font-size:10px}.diag-shell{padding:10px}}
+
 </style>
 </head>
 <body>
@@ -127,7 +151,10 @@ th:100%;height:auto;position:absolute;inset:0}
         <div class="tutorial-kicker">TUTORIAL • MOTION GUIDE</div>
         <div id="tutorialProgress" class="tutorial-progress">手本 1 / 5</div>
       </div>
-      <button id="tutorialClose" type="button">戻る</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="diagOpen" class="diag-open" type="button">🧪 深層診断</button>
+        <button id="tutorialClose" type="button">戻る</button>
+      </div>
     </div>
     <div class="tutorial-stage">
       <canvas id="tutorial3d"></canvas>
@@ -150,6 +177,41 @@ th:100%;height:auto;position:absolute;inset:0}
         <button id="tutorialPractice" class="primary" type="button">手本を見終えたら実践へ</button>
       </div>
     </div>
+  </div>
+
+<div id="diagPanel" class="diag-panel" aria-hidden="true">
+  <div class="diag-shell">
+    <div class="diag-head">
+      <button id="diagClose" class="diag-close" type="button">閉じる</button>
+      <h2 class="diag-title">PUNCH ARENA • 3D 手本 超詳細診断</h2>
+      <div class="diag-sub">Canvas / WebGL / Three.js / FBX / モデル座標 / カメラ / アニメーション / 描画ピクセル / Safari環境 / エラーを実機で自動監査します。ここで出る結果が、最終的な原因切り分けの材料です。</div>
+      <div class="diag-actions">
+        <button id="diagRun" class="primary" type="button">🔎 今すぐ完全診断</button>
+        <button id="diagCopy" type="button">📋 レポートをコピー</button>
+        <button id="diagDownload" type="button">⬇ TXT保存</button>
+        <button id="diagClear" type="button">ログ消去</button>
+      </div>
+      <div class="diag-summary">
+        <div class="diag-kpi"><div class="k">判定</div><div id="diagOverall" class="v">未診断</div></div>
+        <div class="diag-kpi"><div class="k">重大</div><div id="diagErrs" class="v">0</div></div>
+        <div class="diag-kpi"><div class="k">警告</div><div id="diagWarns" class="v">0</div></div>
+        <div class="diag-kpi"><div class="k">成功</div><div id="diagOks" class="v">0</div></div>
+      </div>
+    </div>
+
+    <div class="diag-card"><h3>① 実行環境・Safari / iPad</h3><div id="diagEnv" class="diag-list"></div></div>
+    <div class="diag-card"><h3>② DOM / Canvas サイズ・表示状態</h3><div id="diagDom" class="diag-list"></div></div>
+    <div class="diag-card"><h3>③ WebGL / Renderer 状態</h3><div id="diagGl" class="diag-list"></div></div>
+    <div class="diag-card"><h3>④ Three.js Scene / Camera 状態</h3><div id="diagScene" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑤ FBX / モデル構造・Bounds・Material</h3><div id="diagModel" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑥ カメラ視錐台 / 画面内判定</h3><div id="diagFrustum" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑦ Animation / Mixer</h3><div id="diagAnim" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑧ Render Loop / FPS / Render Calls</h3><div id="diagLoop" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑨ ピクセル実測・モデル単独描画テスト</h3><div id="diagPixels" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑩ ネットワーク / FBX URL 調査</h3><div id="diagNet" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑪ ブラウザエラー / Promise rejection / WebGL context</h3><div id="diagErrors" class="diag-list"></div></div>
+    <div class="diag-card"><h3>⑫ 最終原因候補・全体的なパッチ結果</h3><div id="diagFinal" class="diag-code diag-report"></div></div>
+    <div class="diag-card"><h3>生ログ</h3><div id="diagRaw" class="diag-list"></div></div>
   </div>
 </div>
 
@@ -270,7 +332,14 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorialReplay: document.getElementById("tutorialReplay"),
     tutorialPractice: document.getElementById("tutorialPractice"),
     tutorialClose: document.getElementById("tutorialClose"),
-    tutorialUpperArrow: document.getElementById("tutorialUpperArrow")
+    tutorialUpperArrow: document.getElementById("tutorialUpperArrow"),
+    diagOpen: document.getElementById("diagOpen"),
+    diagPanel: document.getElementById("diagPanel"),
+    diagClose: document.getElementById("diagClose"),
+    diagRun: document.getElementById("diagRun"),
+    diagCopy: document.getElementById("diagCopy"),
+    diagDownload: document.getElementById("diagDownload"),
+    diagClear: document.getElementById("diagClear")
   };
 
   let stream = null, running = false, raf = 0;
@@ -317,6 +386,7 @@ th:100%;height:auto;position:absolute;inset:0}
   let tutorialIndex = 0;
   let tutorialLoaded = false;
   let tutorialAutoTimer = 0;
+  setTimeout(()=>renderDiag(),0);
 
   const MODEL_TUTORIALS = [
     {label:'右ストレート', desc:'右腕をまっすぐ前へ。肩を残して拳を素早く伸ばします。', file:'Migi_straight.fbx', fallbacks:['Migi_straight.fbx'], kind:'model'},
@@ -326,8 +396,407 @@ th:100%;height:auto;position:absolute;inset:0}
     {label:'アッパー', desc:'下から上へ。胸の前からあご方向へ、拳を一気に突き上げます。', file:'手本FBXなし', fallbacks:[], kind:'upper'}
   ];
 
+
+  // =========================
+  // DEEP DIAGNOSTIC PATCH
+  // =========================
+  const diag = {
+    startedAt: performance.now(),
+    logs: [],
+    counts: {ok:0,warn:0,error:0,info:0},
+    rafCount:0,
+    firstRenderT:0,
+    lastRenderT:0,
+    renderSamples:[],
+    lastModelFile:null,
+    lastAssetUrl:null,
+    currentStep:null,
+    modelLoad:{start:0,end:0,duration:0,status:'not-started',error:null,url:null,httpStatus:null,contentType:null,contentLength:null},
+    lastPixelProbe:null,
+    lastModelPixelProbe:null,
+    lastContextError:null,
+    unhandled:[],
+    hasRun:false
+  };
+
+  function diagNow(){ return performance.now()-diag.startedAt; }
+  function diagFmt(v){
+    if(v===null||v===undefined) return 'null';
+    if(typeof v==='number') return Number.isFinite(v)?(Math.abs(v)>=100?String(Math.round(v*100)/100):String(Math.round(v*1000)/1000)):String(v);
+    if(typeof v==='object') { try{return JSON.stringify(v);}catch(_e){return String(v);} }
+    return String(v);
+  }
+  function diagPush(level,cat,msg,data){
+    const lv=String(level||'info');
+    diag.counts[lv]=(diag.counts[lv]||0)+1;
+    const entry={t:diagNow(),level:lv,cat:String(cat||'general'),msg:String(msg||''),data:data===undefined?null:data};
+    diag.logs.push(entry);
+    if(diag.logs.length>1200) diag.logs.shift();
+    renderDiag();
+  }
+  function diagSet(id, lines){
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML='';
+    const arr=Array.isArray(lines)?lines:[String(lines??'')];
+    for(const line of arr){
+      const div=document.createElement('div'); div.textContent=String(line); el.appendChild(div);
+    }
+  }
+  function diagSnapshotEnv(){
+    const ua=navigator.userAgent||'';
+    const nav=navigator.userAgentData||null;
+    return [
+      `時刻: ${new Date().toString()}`,
+      `URL: ${location.href}`,
+      `UA: ${ua}`,
+      `platform: ${navigator.platform||'?'}`,
+      `vendor: ${navigator.vendor||'?'}`,
+      `language: ${navigator.language||'?'}`,
+      `online: ${navigator.onLine}`,
+      `deviceMemory: ${navigator.deviceMemory??'n/a'}`,
+      `hardwareConcurrency: ${navigator.hardwareConcurrency??'n/a'}`,
+      `screen: ${screen.width}x${screen.height} @dpr:${window.devicePixelRatio||1}`,
+      `viewport: ${innerWidth}x${innerHeight}`,
+      `orientation: ${screen.orientation?.type||'n/a'}`,
+      `touchPoints: ${navigator.maxTouchPoints??'n/a'}`,
+      `standalone(PWA): ${window.matchMedia?.('(display-mode: standalone)').matches??false}`,
+      `userAgentData: ${nav?JSON.stringify({mobile:nav.mobile,platform:nav.platform,brands:nav.brands}):'n/a'}`
+    ];
+  }
+  function diagWebGLInfo(){
+    const out=[];
+    const r=tutorial3DRenderer;
+    if(!r){ out.push('ERROR: tutorial3DRenderer が未生成'); return out; }
+    const gl=r.getContext();
+    out.push(`renderer.type: ${r.constructor?.name||'unknown'}`);
+    out.push(`canvas: ${r.domElement===els.tutorial3d?'OK (tutorial3dと同一)':'NG (別Canvas)'}`);
+    out.push(`WebGL context: ${gl?'取得OK':'取得NG'}`);
+    if(gl){
+      const dbg=gl.getExtension('WEBGL_debug_renderer_info');
+      out.push(`GL VERSION: ${gl.getParameter(gl.VERSION)}`);
+      out.push(`GLSL: ${gl.getParameter(gl.SHADING_LANGUAGE_VERSION)}`);
+      out.push(`Vendor: ${dbg?gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)}`);
+      out.push(`Renderer: ${dbg?gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)}`);
+      out.push(`MAX_TEXTURE_SIZE: ${gl.getParameter(gl.MAX_TEXTURE_SIZE)}`);
+      out.push(`MAX_VIEWPORT_DIMS: ${JSON.stringify(gl.getParameter(gl.MAX_VIEWPORT_DIMS))}`);
+      out.push(`ALIASED_LINE_WIDTH_RANGE: ${JSON.stringify(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE))}`);
+      out.push(`contextLost: ${gl.isContextLost?.()??false}`);
+      const err=gl.getError(); out.push(`gl.getError(): ${err} (${err===0?'NO_ERROR':'ERROR'})`);
+      const attrs=gl.getContextAttributes?.(); out.push(`contextAttributes: ${JSON.stringify(attrs||{})}`);
+      out.push(`drawingBuffer: ${gl.drawingBufferWidth}x${gl.drawingBufferHeight}`);
+    }
+    if(r.info){
+      out.push(`renderer.info.render.calls: ${r.info.render.calls}`);
+      out.push(`renderer.info.render.triangles: ${r.info.render.triangles}`);
+      out.push(`renderer.info.memory.geometries: ${r.info.memory.geometries}`);
+      out.push(`renderer.info.memory.textures: ${r.info.memory.textures}`);
+    }
+    return out;
+  }
+  function diagDomInfo(){
+    const c=els.tutorial3d, r=els.modelTutorial;
+    if(!c||!r) return ['ERROR: tutorial DOM が見つからない'];
+    const cr=c.getBoundingClientRect(), rr=r.getBoundingClientRect();
+    const cs=getComputedStyle(c), rs=getComputedStyle(r);
+    return [
+      `tutorial overlay rect: x=${Math.round(rr.x)} y=${Math.round(rr.y)} w=${Math.round(rr.width)} h=${Math.round(rr.height)}`,
+      `canvas client rect: x=${Math.round(cr.x)} y=${Math.round(cr.y)} w=${Math.round(cr.width)} h=${Math.round(cr.height)}`,
+      `canvas backing store: ${c.width}x${c.height}`,
+      `canvas display/visibility/opacity: ${cs.display}/${cs.visibility}/${cs.opacity}`,
+      `canvas position/z-index: ${cs.position}/${cs.zIndex}`,
+      `overlay display/visibility/opacity: ${rs.display}/${rs.visibility}/${rs.opacity}`,
+      `canvas parent: ${c.parentElement?.className||'?'}`,
+      `canvas connected: ${c.isConnected}`,
+      `renderer DOM same element: ${tutorial3DRenderer?.domElement===c}`,
+      `CSS pixel -> backing ratio: ${c.clientWidth?((c.width/c.clientWidth).toFixed(2)):'n/a'}`
+    ];
+  }
+  function diagSceneInfo(){
+    const s=tutorial3DScene, cam=tutorial3DCamera, r=tutorial3DRenderer;
+    if(!s||!cam) return ['ERROR: Scene/Camera 未生成'];
+    const visible=[]; const hidden=[]; let meshes=0, lights=0, groups=0, helpers=0;
+    s.traverse(o=>{if(o.isMesh) meshes++; if(o.isLight) lights++; if(o.isGroup) groups++; if(o.type?.includes('Helper')) helpers++; if(o.visible) visible.push(o.type+':'+(o.name||'(unnamed)')); else hidden.push(o.type+':'+(o.name||'(unnamed)'));});
+    return [
+      `scene.children: ${s.children.length}`,
+      `scene visible objects: ${visible.length}`,
+      `scene hidden objects: ${hidden.length}`,
+      `meshes: ${meshes} / lights: ${lights} / groups: ${groups} / helpers: ${helpers}`,
+      `camera position: ${JSON.stringify(cam.position.toArray().map(v=>+v.toFixed(5)))}`,
+      `camera rotation: ${JSON.stringify(cam.rotation.toArray().map(v=>+v.toFixed(5)))}`,
+      `camera fov/aspect/near/far: ${cam.fov}/${cam.aspect}/${cam.near}/${cam.far}`,
+      `camera matrixWorldInverse ok: ${cam.matrixWorldInverse?.elements?.length===16}`,
+      `renderer exists: ${!!r}`
+    ];
+  }
+  function diagModelInfo(){
+    const out=[]; const m=tutorial3DModel;
+    if(!m){ out.push('MODEL: null（まだFBX/upper guideがセットされていない）'); return out; }
+    let meshes=0,bones=0,skinned=0,hiddenMeshes=0,frustumOn=0,opaque=0,transparent=0,maps=0;
+    const matSamples=[];
+    m.traverse(o=>{
+      if(o.isBone) bones++;
+      if(o.isSkinnedMesh) skinned++;
+      if(o.isMesh){
+        meshes++; if(!o.visible) hiddenMeshes++; if(o.frustumCulled) frustumOn++;
+        const ms=Array.isArray(o.material)?o.material:[o.material];
+        for(const mm of ms){
+          if(mm?.transparent) transparent++; else opaque++;
+          if(mm?.map) maps++;
+          if(matSamples.length<8) matSamples.push(`${mm?.type||'null'} color=${mm?.color?.getHexString?.()||'?'} opacity=${mm?.opacity??'?'} transparent=${!!mm?.transparent} side=${mm?.side??'?'}`);
+        }
+      }
+    });
+    m.updateMatrixWorld(true);
+    const box=new THREE.Box3().setFromObject(m), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+    const pos=m.position.toArray().map(v=>+v.toFixed(5)), scale=m.scale.toArray().map(v=>+v.toFixed(5)), rot=m.rotation.toArray().map(v=>+v.toFixed(5));
+    const max=Math.max(size.x,size.y,size.z);
+    out.push(`type/name: ${m.type}/${m.name||'(unnamed)'}`);
+    out.push(`visible: ${m.visible} / renderOrder: ${m.renderOrder}`);
+    out.push(`position: ${JSON.stringify(pos)}`); out.push(`scale: ${JSON.stringify(scale)}`); out.push(`rotation: ${JSON.stringify(rot)}`);
+    out.push(`WORLD BOX min: ${JSON.stringify(box.min.toArray().map(v=>+v.toFixed(5)))}`);
+    out.push(`WORLD BOX max: ${JSON.stringify(box.max.toArray().map(v=>+v.toFixed(5)))}`);
+    out.push(`WORLD SIZE: ${JSON.stringify(size.toArray().map(v=>+v.toFixed(5)))} max=${max.toFixed(5)}`);
+    out.push(`WORLD CENTER: ${JSON.stringify(center.toArray().map(v=>+v.toFixed(5)))}`);
+    out.push(`meshes=${meshes} bones=${bones} skinned=${skinned} hiddenMeshes=${hiddenMeshes} frustumCulled=${frustumOn}`);
+    out.push(`materials opaque=${opaque} transparent=${transparent} textureMaps=${maps}`);
+    out.push(`animations on root: ${Array.isArray(m.animations)?m.animations.length:0}`);
+    if(matSamples.length){ out.push('material samples:'); matSamples.forEach(x=>out.push('  '+x)); }
+    return out;
+  }
+  function diagProjection(){
+    const out=[]; const m=tutorial3DModel, cam=tutorial3DCamera;
+    if(!m||!cam){ out.push('MODEL/CAMERA未準備'); return out; }
+    m.updateMatrixWorld(true); cam.updateMatrixWorld(true); cam.updateProjectionMatrix();
+    const box=new THREE.Box3().setFromObject(m); const min=box.min, max=box.max;
+    const pts=[
+      new THREE.Vector3(min.x,min.y,min.z),new THREE.Vector3(min.x,min.y,max.z),new THREE.Vector3(min.x,max.y,min.z),new THREE.Vector3(min.x,max.y,max.z),
+      new THREE.Vector3(max.x,min.y,min.z),new THREE.Vector3(max.x,min.y,max.z),new THREE.Vector3(max.x,max.y,min.z),new THREE.Vector3(max.x,max.y,max.z)
+    ];
+    let ndc=pts.map(p=>p.clone().project(cam));
+    const minN=new THREE.Vector3(Infinity,Infinity,Infinity), maxN=new THREE.Vector3(-Infinity,-Infinity,-Infinity);
+    for(const p of ndc){minN.min(p);maxN.max(p);}
+    const anyIn=ndc.some(p=>p.x>=-1&&p.x<=1&&p.y>=-1&&p.y<=1&&p.z>=-1&&p.z<=1);
+    const center=box.getCenter(new THREE.Vector3()); const cN=center.clone().project(cam);
+    const camSpace=center.clone(); camSpace.applyMatrix4(cam.matrixWorldInverse);
+    out.push(`projected NDC min: ${JSON.stringify(minN.toArray().map(v=>+v.toFixed(4)))}`);
+    out.push(`projected NDC max: ${JSON.stringify(maxN.toArray().map(v=>+v.toFixed(4)))}`);
+    out.push(`projected center NDC: ${JSON.stringify(cN.toArray().map(v=>+v.toFixed(4)))}`);
+    out.push(`center camera-space Z: ${camSpace.z.toFixed(5)} (負ならカメラ前方)`);
+    out.push(`any bounding-box corner inside view: ${anyIn}`);
+    out.push(`fully left/right/up/down 判定: left=${maxN.x< -1}, right=${minN.x>1}, bottom=${maxN.y< -1}, top=${minN.y>1}`);
+    return out;
+  }
+  function readPixelsFromCurrentFramebuffer(gl){
+    const w=gl.drawingBufferWidth, h=gl.drawingBufferHeight;
+    if(!w||!h) return {ok:false,reason:`drawingBuffer ${w}x${h}`};
+    const pts=[
+      [0.50,0.50],[0.25,0.50],[0.75,0.50],[0.50,0.25],[0.50,0.75],[0.25,0.25],[0.75,0.75],[0.10,0.10],[0.90,0.90]
+    ];
+    const vals=[];
+    for(const [u,v] of pts){
+      const x=Math.max(0,Math.min(w-1,Math.floor(u*w))), y=Math.max(0,Math.min(h-1,Math.floor((1-v)*h)));
+      const p=new Uint8Array(4);
+      try{gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,p); vals.push({u,v,rgba:[...p]});}
+      catch(e){return {ok:false,reason:String(e)};}
+    }
+    return {ok:true,w,h,vals};
+  }
+  function renderModelOnlyPixelProbe(){
+    const out=[]; const r=tutorial3DRenderer, scene=tutorial3DScene, model=tutorial3DModel;
+    if(!r||!scene||!model){out.push('モデル単独描画テストを実行できない: Renderer/Scene/Model不足'); return out;}
+    const savedBg=scene.background; const savedClearColor=new THREE.Color(); r.getClearColor(savedClearColor); const savedClearAlpha=r.getClearAlpha(); const savedVis=new Map();
+    scene.traverse(o=>{savedVis.set(o,o.visible); if(o!==scene && o!==model && !o.isLight){o.visible=false;}});
+    model.visible=true;
+    scene.background=null;
+    r.setClearColor(0x000000,0);
+    try{
+      r.render(scene,tutorial3DCamera);
+      const gl=r.getContext();
+      const pr=readPixelsFromCurrentFramebuffer(gl);
+      diag.lastModelPixelProbe=pr;
+      if(pr.ok){
+        const nonBlack=pr.vals.filter(x=>x.rgba[0]>4||x.rgba[1]>4||x.rgba[2]>4||x.rgba[3]>4).length;
+        out.push(`model-only render: OK`); out.push(`sample points non-black/alpha: ${nonBlack}/${pr.vals.length}`); out.push(`samples: ${JSON.stringify(pr.vals)}`);
+        out.push(`判定: ${nonBlack>0?'モデル由来の画素を観測できた可能性あり':'モデル由来の画素が取れない（位置/材質/描画/カメラを重点確認）'}`);
+      }else out.push(`readPixels NG: ${pr.reason}`);
+      const glErr=gl.getError(); out.push(`after model-only render gl.getError(): ${glErr}`);
+    }catch(e){out.push(`model-only render例外: ${e?.stack||e}`)}
+    for(const [o,v] of savedVis) o.visible=v;
+    scene.background=savedBg;
+    r.setClearColor(savedClearColor,savedClearAlpha);
+    r.render(scene,tutorial3DCamera);
+    return out;
+  }
+  async function diagNetwork(step){
+    const out=[]; const file=step?.file; if(!file||step.kind==='upper'){out.push('FBXなし（upper guide）: ネットワーク調査対象外');return out;}
+    const url=new URL(file,document.baseURI).href; diag.lastAssetUrl=url;
+    out.push(`resolved URL: ${url}`);
+    const t=performance.now();
+    try{
+      const res=await fetch(url,{method:'HEAD',cache:'no-store'});
+      const dur=performance.now()-t;
+      out.push(`HEAD status: ${res.status} ${res.statusText}`);
+      out.push(`HEAD duration: ${dur.toFixed(1)}ms`);
+      out.push(`content-type: ${res.headers.get('content-type')||'?'}`);
+      out.push(`content-length: ${res.headers.get('content-length')||'?'}`);
+      out.push(`cache-control: ${res.headers.get('cache-control')||'?'}`);
+      if(!res.ok) diagPush('error','NETWORK',`FBX HEAD ${res.status}: ${file}`); else diagPush('ok','NETWORK',`FBX HEAD OK: ${file}`);
+    }catch(e){
+      out.push(`HEAD exception: ${e?.message||e}`);
+      diagPush('warn','NETWORK','HEAD調査不可。CORS/サーバー仕様の可能性あり',{file,url,error:String(e)});
+    }
+    return out;
+  }
+  function diagAnimation(){
+    const out=[]; const m=tutorial3DModel;
+    if(!m){out.push('modelなし');return out;}
+    out.push(`root animations: ${Array.isArray(m.animations)?m.animations.length:0}`);
+    if(tutorial3DMixer){
+      out.push(`AnimationMixer: 生成済み`);
+      out.push(`mixer time: ${tutorial3DMixer.time}`);
+      const acts=tutorial3DMixer._actions||[];
+      out.push(`mixer actions: ${acts.length}`);
+      for(let i=0;i<Math.min(acts.length,10);i++){
+        const a=acts[i]; out.push(` action[${i}] enabled=${a.enabled} paused=${a.paused} time=${a.time} weight=${a.weight}`);
+      }
+    }else out.push('AnimationMixer: 未生成');
+    return out;
+  }
+  function diagLoopInfo(){
+    const out=[]; const r=tutorial3DRenderer;
+    out.push(`RAF count: ${diag.rafCount}`);
+    out.push(`first render relative ms: ${diag.firstRenderT?diag.firstRenderT.toFixed(1):'未記録'}`);
+    out.push(`last render relative ms: ${diag.lastRenderT?diag.lastRenderT.toFixed(1):'未記録'}`);
+    if(diag.renderSamples.length>1){
+      const first=diag.renderSamples[0], last=diag.renderSamples[diag.renderSamples.length-1];
+      const sec=Math.max((last.t-first.t)/1000,.001); out.push(`sampled FPS: ${((diag.renderSamples.length-1)/sec).toFixed(1)}`);
+    }
+    if(r?.info){out.push(`render.calls=${r.info.render.calls}`);out.push(`triangles=${r.info.render.triangles}`);out.push(`geometries=${r.info.memory.geometries}`);out.push(`textures=${r.info.memory.textures}`);}
+    return out;
+  }
+  function diagErrorInfo(){
+    const out=[];
+    out.push(`captured unhandled errors: ${diag.unhandled.length}`);
+    for(const x of diag.unhandled.slice(-30)) out.push(`[${x.type}] ${x.message}`);
+    out.push(`last WebGL context error: ${diag.lastContextError||'なし'}`);
+    return out;
+  }
+  function diagFinalReport(){
+    const findings=[];
+    const c=diag.counts;
+    const cdom=els.tutorial3d?.getBoundingClientRect();
+    if(!tutorial3DRenderer) findings.push('重大: Three.js Rendererが存在しない。WebGL初期化を確認。');
+    if(cdom && (cdom.width<10||cdom.height<10)) findings.push('重大: tutorial3d CanvasのCSSサイズが10px未満。表示領域/レイアウト起因の可能性が高い。');
+    if(tutorial3DRenderer?.getContext()?.isContextLost?.()) findings.push('重大: WebGLコンテキストがLost。Safari/WebGLリソース問題を確認。');
+    if(tutorial3DModel){
+      const box=new THREE.Box3().setFromObject(tutorial3DModel); const size=box.getSize(new THREE.Vector3());
+      if(Math.max(size.x,size.y,size.z)<0.01) findings.push('重大: モデルのワールドサイズが極小。scale/FBX単位/fit処理を確認。');
+      if(!tutorial3DModel.visible) findings.push('重大: モデル.visible=false。');
+      const meshInfo=[]; tutorial3DModel.traverse(o=>{if(o.isMesh) meshInfo.push(o)});
+      if(meshInfo.length===0) findings.push('重大: Meshが0件。FBXは読み込めても描画対象が無い可能性。');
+      const allHidden=meshInfo.length>0&&meshInfo.every(o=>!o.visible); if(allHidden) findings.push('重大: すべてのMeshがvisible=false。');
+      const alphaZero=meshInfo.some(o=>{const ms=Array.isArray(o.material)?o.material:[o.material];return ms.some(m=>m&&m.opacity<=0)}); if(alphaZero) findings.push('警告: opacity=0以下のMaterialが存在。');
+      const ndcLines=diagProjection(); const anyLine=ndcLines.find(x=>x.startsWith('any bounding-box')); if(anyLine && anyLine.endsWith('false')) findings.push('重大: FBX BoundingBoxがカメラ視野内に入っていない。カメラ位置/向き/fitを疑う。');
+    }
+    const pr=diag.lastModelPixelProbe; if(pr?.ok){const n=pr.vals.filter(x=>x.rgba.some(v=>v>4)).length; if(n===0) findings.push('重大: モデル単独描画でも画素を観測できない。材質/深度/カメラ/geometryを重点調査。'); else findings.push('確認: モデル単独描画で非黒画素を観測。Rendererとモデルの基本描画経路は生きている可能性が高い。');}
+    if(diag.modelLoad.status==='error') findings.push(`重大: FBXロード失敗: ${diag.modelLoad.error||'unknown'}`);
+    if(diag.modelLoad.httpStatus && Number(diag.modelLoad.httpStatus)>=400) findings.push(`重大: FBX HTTP ${diag.modelLoad.httpStatus}`);
+    if(diag.unhandled.length) findings.push(`警告: 実行中に${diag.unhandled.length}件の未処理エラー/Promise rejectionを捕捉。先頭をエラーログで確認。`);
+    if(!findings.length) findings.push('現時点で決定的な故障は自動検出されていない。モデル表示が不安定なら、このレポート全体を保存して実機ログと照合する。');
+    return [
+      `総合判定: ${c.error?'ERROR':c.warn?'WARNING':'PASS'}`,
+      `ログ件数: total=${diag.logs.length} info=${c.info} ok=${c.ok} warn=${c.warn} error=${c.error}`,
+      '',
+      '【原因候補】',
+      ...findings.map((x,i)=>`${i+1}. ${x}`),
+      '',
+      '【最終パッチ結果】',
+      '・DOM/Canvas寸法監査: 実測値を取得',
+      '・WebGL Renderer/GL Error監査: 実測値を取得',
+      '・Scene/Camera/FBX Bounds監査: 実測値を取得',
+      '・NDC視野内判定: 8頂点を投影して判定',
+      '・モデル単独描画: 背景/床/補助物を一時非表示にしてreadPixels実測',
+      '・FBX URL: resolved URL + HEAD応答を記録',
+      '・AnimationMixer: action/timeを記録',
+      '・Render Loop: RAF/FPS/render calls/trianglesを記録',
+      '・Safari/端末環境: UA, DPR, viewport, WebGL vendor/renderer等を記録',
+      '・未処理error/unhandledrejection: グローバル捕捉',
+      '',
+      '【重要】このパッチは「推測で原因を決める」のではなく、実機で観測値を取り、最後に自動判定するための調査用です。ここでPASSでも、ユーザーが見る映像との差がある場合はreadPixels値とNDC値を優先して確認してください。'
+    ].join('\n');
+  }
+  function renderDiag(){
+    if(!els.diagPanel) return;
+    document.getElementById('diagOverall').textContent=!diag.hasRun?'未診断':(diag.counts.error?'ERROR':diag.counts.warn?'WARNING':'PASS');
+    document.getElementById('diagErrs').textContent=diag.counts.error;
+    document.getElementById('diagWarns').textContent=diag.counts.warn;
+    document.getElementById('diagOks').textContent=diag.counts.ok;
+    diagSet('diagEnv',diagSnapshotEnv());
+    diagSet('diagDom',diagDomInfo());
+    diagSet('diagGl',diagWebGLInfo());
+    diagSet('diagScene',diagSceneInfo());
+    diagSet('diagModel',diagModelInfo());
+    diagSet('diagFrustum',diagProjection());
+    diagSet('diagAnim',diagAnimation());
+    diagSet('diagLoop',diagLoopInfo());
+    diagSet('diagPixels',diag.lastModelPixelProbe?renderPixelLines(diag.lastModelPixelProbe):['未実行：完全診断を実行してください']);
+    diagSet('diagNet',diag.modelLoad.url?[`last URL: ${diag.modelLoad.url}`,`status: ${diag.modelLoad.status}`,`http: ${diag.modelLoad.httpStatus??'n/a'}`,`content-type: ${diag.modelLoad.contentType??'n/a'}`,`duration: ${diag.modelLoad.duration?diag.modelLoad.duration.toFixed(1)+'ms':'n/a'}`]:['未実行/未ロード']);
+    diagSet('diagErrors',diagErrorInfo());
+    const raw=document.getElementById('diagRaw'); if(raw){raw.innerHTML=''; for(const e of diag.logs.slice(-350)){const row=document.createElement('div');row.className='diag-row'; const a=document.createElement('div');a.className='diag-time';a.textContent=e.t.toFixed(1)+'ms';const b=document.createElement('div');b.className='diag-cat';b.textContent=e.cat;const c=document.createElement('div');c.className='diag-msg';c.textContent=`[${e.level}] ${e.msg}${e.data!==null?' | '+diagFmt(e.data):''}`;row.append(a,b,c);raw.appendChild(row);} }
+    const fin=document.getElementById('diagFinal'); if(fin) fin.textContent=diagFinalReport();
+  }
+  function renderPixelLines(pr){
+    if(!pr?.ok) return [`pixel probe: NG`, `reason: ${pr?.reason||'unknown'}`];
+    const n=pr.vals.filter(x=>x.rgba.some(v=>v>4)).length;
+    return [`drawingBuffer: ${pr.w}x${pr.h}`,`non-black samples: ${n}/${pr.vals.length}`,`values:`,...pr.vals.map(x=>`  (${x.u},${x.v}) -> rgba=${x.rgba.join(',')}`)];
+  }
+  async function runDeepDiagnostic(){
+    diagPush('info','DIAG','完全診断開始',{step:tutorialIndex,file:MODEL_TUTORIALS[tutorialIndex]?.file});
+    const step=MODEL_TUTORIALS[tutorialIndex];
+    diag.hasRun=true;
+    if(tutorial3DRenderer){
+      const gl=tutorial3DRenderer.getContext();
+      diag.lastPixelProbe=gl?readPixelsFromCurrentFramebuffer(gl):null;
+      try{tutorial3DRenderer.render(tutorial3DScene,tutorial3DCamera);}catch(e){diagPush('error','RENDER',`render() exception: ${e?.stack||e}`);}
+      diag.lastModelPixelProbe=renderModelOnlyPixelProbe();
+    }
+    if(step?.kind==='model'){
+      diag.modelLoad.url=new URL(step.file,document.baseURI).href;
+      const t=performance.now();
+      try{
+        const res=await fetch(diag.modelLoad.url,{method:'HEAD',cache:'no-store'});
+        diag.modelLoad.httpStatus=res.status; diag.modelLoad.contentType=res.headers.get('content-type'); diag.modelLoad.contentLength=res.headers.get('content-length'); diag.modelLoad.duration=performance.now()-t; diag.modelLoad.status=res.ok?'ok':'error';
+      }catch(e){diag.modelLoad.duration=performance.now()-t;diag.modelLoad.status='network-unknown';diag.modelLoad.error=String(e);}
+    }else diag.modelLoad.status='upper-guide';
+    diagPush(diag.counts.error?'warn':'ok','DIAG','完全診断終了',{summary:diagFinalReport().split('\n')[0]});
+    renderDiag();
+  }
+  function openDiag(){els.diagPanel.classList.add('show');els.diagPanel.setAttribute('aria-hidden','false');renderDiag();}
+  function closeDiag(){els.diagPanel.classList.remove('show');els.diagPanel.setAttribute('aria-hidden','true');}
+  async function copyDiag(){
+    const text=diagFinalReport()+'\n\n'+diag.logs.map(e=>`[${e.t.toFixed(1)}ms][${e.level}][${e.cat}] ${e.msg}${e.data!==null?' | '+diagFmt(e.data):''}`).join('\n');
+    try{await navigator.clipboard.writeText(text);diagPush('ok','DIAG','レポートをクリップボードへコピーしました');}
+    catch(_e){diagPush('warn','DIAG','クリップボードAPIが使えないためコピー失敗。TXT保存を利用してください');}
+  }
+  function downloadDiag(){
+    const text=diagFinalReport()+'\n\n'+diag.logs.map(e=>`[${e.t.toFixed(1)}ms][${e.level}][${e.cat}] ${e.msg}${e.data!==null?' | '+diagFmt(e.data):''}`).join('\n');
+    const blob=new Blob([text],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`punch_arena_3d_diagnostic_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+  function clearDiag(){diag.logs=[];diag.counts={ok:0,warn:0,error:0,info:0};renderDiag();}
+  els.diagOpen?.addEventListener('click',openDiag);
+  els.diagClose?.addEventListener('click',closeDiag);
+  els.diagRun?.addEventListener('click',()=>{runDeepDiagnostic().catch(e=>diagPush('error','DIAG','完全診断例外',{error:String(e),stack:e?.stack}))});
+  els.diagCopy?.addEventListener('click',copyDiag);
+  els.diagDownload?.addEventListener('click',downloadDiag);
+  els.diagClear?.addEventListener('click',clearDiag);
+  window.addEventListener('error',e=>{const x={type:'window.error',message:e?.error?.stack||e?.message||String(e)};diag.unhandled.push(x);diagPush('error','BROWSER',x.message);});
+  window.addEventListener('unhandledrejection',e=>{const x={type:'unhandledrejection',message:e?.reason?.stack||e?.reason?.message||String(e?.reason)};diag.unhandled.push(x);diagPush('error','PROMISE',x.message);});
+  window.addEventListener('webglcontextlost',e=>{diag.lastContextError='webglcontextlost';diagPush('error','WEBGL','WebGL context lost');});
+  window.addEventListener('webglcontextrestored',e=>{diag.lastContextError='context restored';diagPush('ok','WEBGL','WebGL context restored');});
+
   async function initModelTutorial(){
-    if(tutorialLoaded || !els.tutorial3d) return;
+    diagPush('info','INIT','initModelTutorial() 開始');
+    if(tutorialLoaded || !els.tutorial3d){ diagPush('info','INIT','既存tutorial3DまたはCanvasなし',{tutorialLoaded,hasCanvas:!!els.tutorial3d}); return; }
     try{ if(window._threeReady) await window._threeReady; }catch(_e){ els.tutorialStatus.textContent='3D手本ライブラリを読み込めません'; return; }
     if(!window.THREE || !window.FBXLoader) return;
     tutorial3DScene = new THREE.Scene();
@@ -335,6 +804,7 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorial3DCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
     tutorial3DCamera.position.set(0, 1.55, 3.7);
     tutorial3DRenderer = new THREE.WebGLRenderer({canvas:els.tutorial3d,antialias:true,alpha:false,powerPreference:'high-performance'});
+    diagPush('ok','WEBGL','WebGLRenderer生成成功');
     tutorial3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     tutorial3DRenderer.outputColorSpace = THREE.SRGBColorSpace;
     tutorial3DRenderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -351,6 +821,7 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorial3DClock=new THREE.Clock();
     tutorialLoaded=true;
     resizeModelTutorial();
+    diagPush('ok','INIT','Scene/Camera/Renderer初期化完了',diagSceneInfo());
     requestAnimationFrame(modelTutorialLoop);
   }
 
@@ -358,6 +829,8 @@ th:100%;height:auto;position:absolute;inset:0}
     if(!tutorial3DRenderer||!els.tutorial3d||!tutorial3DCamera) return;
     const rect=els.tutorial3d.getBoundingClientRect();
     const w=Math.max(1,Math.floor(rect.width)), h=Math.max(1,Math.floor(rect.height));
+    if(w<20||h<20) diagPush('warn','DOM','Canvas CSSサイズが極端に小さい',{w,h,rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height}});
+    else diagPush('ok','DOM','Canvas resize',{w,h,clientW:els.tutorial3d.clientWidth,clientH:els.tutorial3d.clientHeight});
     // Safari/iPad対策: canvasのCSSサイズとWebGL内部解像度を明示的に同期。
     tutorial3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     tutorial3DRenderer.setSize(w,h,false);
@@ -457,6 +930,9 @@ th:100%;height:auto;position:absolute;inset:0}
 
   async function loadTutorialStep(index){
     tutorialIndex=Math.max(0,Math.min(MODEL_TUTORIALS.length-1,index));
+    diag.currentStep=MODEL_TUTORIALS[tutorialIndex];
+    diag.modelLoad={start:performance.now(),end:0,duration:0,status:'loading',error:null,url:null,httpStatus:null,contentType:null,contentLength:null};
+    diagPush('info','FBX','チュートリアルStep開始',{index:tutorialIndex,step:MODEL_TUTORIALS[tutorialIndex]});
     const step=MODEL_TUTORIALS[tutorialIndex];
     els.tutorialProgress.textContent=`手本 ${tutorialIndex+1} / ${MODEL_TUTORIALS.length}`;
     els.tutorialTitle.textContent=step.label;
@@ -481,18 +957,23 @@ th:100%;height:auto;position:absolute;inset:0}
       const model=await new Promise((resolve,reject)=>loader.load(step.file,resolve,undefined,reject));
       if(req!==tutorial3DRequest) return;
       tutorial3DModel=model;
+      diag.modelLoad.end=performance.now(); diag.modelLoad.duration=diag.modelLoad.end-diag.modelLoad.start; diag.modelLoad.status='loaded'; diag.modelLoad.url=new URL(step.file,document.baseURI).href;
+      diagPush('ok','FBX','FBXLoader load callback 成功',{file:step.file,duration:diag.modelLoad.duration,animations:model.animations?.length||0});
       prepareTutorialModel(model);
       model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true; if(o.material){o.material.side=THREE.FrontSide;}}});
-      tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial(); resizeModelTutorial();
+      tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial(); resizeModelTutorial(); diagPush('info','MODEL','FBX配置後監査',diagModelInfo()); diagPush('info','CAMERA','配置後NDC監査',diagProjection());
+      setTimeout(()=>{ if(els.diagPanel?.classList.contains('show')) runDeepDiagnostic().catch(e=>diagPush('error','DIAG',String(e))); },300);
       if(Array.isArray(model.animations)&&model.animations.length){
         tutorial3DMixer=new THREE.AnimationMixer(model);
         const clip=model.animations[0];
         const action=tutorial3DMixer.clipAction(clip); action.reset().play();
-        els.tutorialStatus.textContent='3D手本 再生中 • モデル表示OK';
+        els.tutorialStatus.textContent='3D手本 再生中 • モデル表示OK'; diagPush('ok','ANIM','AnimationMixer + action 再生開始',{clips:model.animations.length});
       }else{
-        els.tutorialStatus.textContent='3Dモデル読み込み完了 • アニメーションなし';
+        els.tutorialStatus.textContent='3Dモデル読み込み完了 • アニメーションなし'; diagPush('warn','ANIM','FBXにanimation clipがない',{animations:0});
       }
     }catch(e){
+      diag.modelLoad.end=performance.now(); diag.modelLoad.duration=diag.modelLoad.end-diag.modelLoad.start; diag.modelLoad.status='error'; diag.modelLoad.error=e?.stack||String(e);
+      diagPush('error','FBX','FBXLoader load失敗',{file:step.file,error:e?.stack||String(e),duration:diag.modelLoad.duration});
       if(req!==tutorial3DRequest) return;
       // fallback names for the user's exact file naming, then a clear placeholder.
       let fallbackLoaded=false;
@@ -501,7 +982,7 @@ th:100%;height:auto;position:absolute;inset:0}
           const loader=new FBXLoader();
           const model=await new Promise((resolve,reject)=>loader.load(file,resolve,undefined,reject));
           if(req!==tutorial3DRequest) return;
-          tutorial3DModel=model; prepareTutorialModel(model); model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial();
+          tutorial3DModel=model; prepareTutorialModel(model); model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial(); diagPush('ok','FBX','fallback FBX load成功',{file,duration:performance.now()-diag.modelLoad.start});
           if(model.animations?.length){tutorial3DMixer=new THREE.AnimationMixer(model);tutorial3DMixer.clipAction(model.animations[0]).play();}
           els.tutorialStatus.textContent=`${file} を再生中`;
           fallbackLoaded=true; break;
@@ -528,6 +1009,8 @@ th:100%;height:auto;position:absolute;inset:0}
     await initModelTutorial();
     resizeModelTutorial();
     loadTutorialStep(0);
+    diagPush('info','TUTORIAL','チュートリアル表示後に3D初期化・診断パッチを開始');
+    setTimeout(()=>{runDeepDiagnostic().catch(e=>diagPush('error','DIAG',e?.stack||String(e)));},900);
   }
 
   function closeModelTutorial(){
@@ -543,6 +1026,10 @@ th:100%;height:auto;position:absolute;inset:0}
 
   function modelTutorialLoop(){
     requestAnimationFrame(modelTutorialLoop);
+    diag.rafCount++;
+    diag.lastRenderT=diagNow();
+    if(!diag.firstRenderT) diag.firstRenderT=diag.lastRenderT;
+    if(diag.renderSamples.length<240) diag.renderSamples.push({t:diag.lastRenderT});
     if(!tutorial3DRenderer||!tutorial3DScene||!tutorial3DCamera) return;
     const dt=tutorial3DClock?.getDelta?.()||0.016;
     if(tutorial3DMixer) tutorial3DMixer.update(dt);
@@ -553,6 +1040,14 @@ th:100%;height:auto;position:absolute;inset:0}
     }
     if(tutorial3DModel && !tutorial3DModel.userData?.upperGuide){tutorial3DModel.rotation.y += dt*0.22;}
     tutorial3DRenderer.render(tutorial3DScene,tutorial3DCamera);
+    if(diag.rafCount%90===0){
+      try{
+        const gl=tutorial3DRenderer.getContext();
+        const err=gl?.getError?.()||0; if(err){diag.lastContextError=String(err);diagPush('error','WEBGL',`gl.getError()=${err}`);}
+        const box=tutorial3DModel?new THREE.Box3().setFromObject(tutorial3DModel):null;
+        diagPush('info','LOOP','定期監査',{raf:diag.rafCount,model:!!tutorial3DModel,box:box?box.getSize(new THREE.Vector3()).toArray().map(v=>+v.toFixed(3)):null,calls:tutorial3DRenderer.info?.render?.calls,triangles:tutorial3DRenderer.info?.render?.triangles});
+      }catch(e){diagPush('warn','LOOP','定期監査例外',String(e));}
+    }
   }
 
   function loadPersistentTraining(){
