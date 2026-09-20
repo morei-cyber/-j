@@ -432,7 +432,27 @@ th:100%;height:auto;position:absolute;inset:0}
     const entry={t:diagNow(),level:lv,cat:String(cat||'general'),msg:String(msg||''),data:data===undefined?null:data};
     diag.logs.push(entry);
     if(diag.logs.length>1200) diag.logs.shift();
-    renderDiag();
+    // 診断UIそのものの例外で本体処理を止めない。
+    try{ renderDiag(); }catch(e){
+      const msg2=e?.stack||e?.message||String(e);
+      if(!diag._renderDiagFaultLogged){
+        diag._renderDiagFaultLogged=true;
+        diag.counts.error=(diag.counts.error||0)+1;
+        diag.logs.push({t:diagNow(),level:'error',cat:'DIAG_UI',msg:'診断UI内部例外を隔離しました',data:msg2});
+      }
+    }
+  }
+  function diagNumArray(arr, precision=5){
+    const a=Array.from(arr||[]);
+    return a.map(v=>{
+      const n=Number(v);
+      return Number.isFinite(n)?Number(n.toFixed(precision)):String(v);
+    });
+  }
+  function diagEulerArray(e, precision=5){
+    if(!e) return null;
+    // Euler.toArray() は [x,y,z,order] の4要素を返すため、order文字列にtoFixed()を掛けない。
+    return [Number(e.x.toFixed(precision)),Number(e.y.toFixed(precision)),Number(e.z.toFixed(precision))];
   }
   function diagSet(id, lines){
     const el=document.getElementById(id); if(!el) return;
@@ -521,8 +541,9 @@ th:100%;height:auto;position:absolute;inset:0}
       `scene visible objects: ${visible.length}`,
       `scene hidden objects: ${hidden.length}`,
       `meshes: ${meshes} / lights: ${lights} / groups: ${groups} / helpers: ${helpers}`,
-      `camera position: ${JSON.stringify(cam.position.toArray().map(v=>+v.toFixed(5)))}`,
-      `camera rotation: ${JSON.stringify(cam.rotation.toArray().map(v=>+v.toFixed(5)))}`,
+      `camera position: ${JSON.stringify(diagNumArray(cam.position.toArray(),5))}`,
+      `camera rotation xyz: ${JSON.stringify(diagEulerArray(cam.rotation,5))}`,
+      `camera rotation order: ${cam.rotation?.order||'?'}`,
       `camera fov/aspect/near/far: ${cam.fov}/${cam.aspect}/${cam.near}/${cam.far}`,
       `camera matrixWorldInverse ok: ${cam.matrixWorldInverse?.elements?.length===16}`,
       `renderer exists: ${!!r}`
@@ -548,7 +569,7 @@ th:100%;height:auto;position:absolute;inset:0}
     });
     m.updateMatrixWorld(true);
     const box=new THREE.Box3().setFromObject(m), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
-    const pos=m.position.toArray().map(v=>+v.toFixed(5)), scale=m.scale.toArray().map(v=>+v.toFixed(5)), rot=m.rotation.toArray().map(v=>+v.toFixed(5));
+    const pos=diagNumArray(m.position.toArray(),5), scale=diagNumArray(m.scale.toArray(),5), rot=diagEulerArray(m.rotation,5);
     const max=Math.max(size.x,size.y,size.z);
     out.push(`type/name: ${m.type}/${m.name||'(unnamed)'}`);
     out.push(`visible: ${m.visible} / renderOrder: ${m.renderOrder}`);
@@ -789,8 +810,18 @@ th:100%;height:auto;position:absolute;inset:0}
   els.diagCopy?.addEventListener('click',copyDiag);
   els.diagDownload?.addEventListener('click',downloadDiag);
   els.diagClear?.addEventListener('click',clearDiag);
-  window.addEventListener('error',e=>{const x={type:'window.error',message:e?.error?.stack||e?.message||String(e)};diag.unhandled.push(x);diagPush('error','BROWSER',x.message);});
-  window.addEventListener('unhandledrejection',e=>{const x={type:'unhandledrejection',message:e?.reason?.stack||e?.reason?.message||String(e?.reason)};diag.unhandled.push(x);diagPush('error','PROMISE',x.message);});
+  window.addEventListener('error',e=>{
+    const raw=e?.error;
+    const x={type:'window.error',message:raw?.message||e?.message||String(raw||e),stack:raw?.stack||null,filename:e?.filename||null,line:e?.lineno||null,col:e?.colno||null};
+    diag.unhandled.push(x);
+    diagPush('error','BROWSER',`${x.message}${x.stack?' | '+x.stack:''}`);
+  });
+  window.addEventListener('unhandledrejection',e=>{
+    const r=e?.reason;
+    const x={type:'unhandledrejection',message:r?.message||String(r),stack:r?.stack||null};
+    diag.unhandled.push(x);
+    diagPush('error','PROMISE',`${x.message}${x.stack?' | '+x.stack:''}`);
+  });
   window.addEventListener('webglcontextlost',e=>{diag.lastContextError='webglcontextlost';diagPush('error','WEBGL','WebGL context lost');});
   window.addEventListener('webglcontextrestored',e=>{diag.lastContextError='context restored';diagPush('ok','WEBGL','WebGL context restored');});
 
