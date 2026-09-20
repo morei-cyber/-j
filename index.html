@@ -77,21 +77,30 @@ th:100%;height:auto;position:absolute;inset:0}
   @media(max-width:720px){.start-features{grid-template-columns:1fr}.start-panel{padding:26px 18px}.player-hud,.battle-hud{min-width:160px;padding:9px}.hud{left:9px;top:9px}.player-hud{left:9px;bottom:9px}.battle-hud{right:9px;top:9px}}
   @media(max-width:700px){h1{font-size:22px}}
 
-  .tutorial-screen{position:fixed;inset:0;z-index:120;background:radial-gradient(circle at 50% 20%,rgba(65,125,255,.22),transparent 40%),linear-gradient(180deg,#060910,#03050a 75%,#020306);display:none;align-items:center;justify-content:center;padding:18px}
-  .tutorial-screen.show{display:flex}
-  .tutorial-panel{width:min(1180px,100%);height:min(860px,94vh);background:rgba(7,11,18,.94);border:1px solid #2b3748;border-radius:24px;box-shadow:0 25px 100px rgba(0,0,0,.55);overflow:hidden;display:grid;grid-template-rows:auto 1fr auto}
-  .tutorial-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid #202a36}
-  .tutorial-kicker{font-size:11px;letter-spacing:.2em;color:#69a8ff;font-weight:900}.tutorial-title{font-size:22px;font-weight:900;margin-top:2px}
-  .tutorial-step{font-size:14px;color:#b9c6d6;padding:10px 13px;border:1px solid #273243;border-radius:999px;background:#0c121b}
-  .tutorial-main{position:relative;min-height:0;background:radial-gradient(circle at 50% 45%,rgba(43,77,120,.12),transparent 45%)}
-  #tutorial3D{display:block;width:100%;height:100%}
-  .tutorial-info{position:absolute;left:24px;top:24px;max-width:390px;padding:18px;border-radius:18px;background:rgba(5,8,14,.72);border:1px solid rgba(255,255,255,.11);backdrop-filter:blur(7px)}
-  .tutorial-move{font-size:30px;font-weight:950;letter-spacing:-.03em}.tutorial-desc{margin-top:8px;color:#b6c1d0;font-size:14px;line-height:1.65}
-  .tutorial-hint{margin-top:12px;color:#79c5ff;font-size:12px;font-weight:800}
-  .tutorial-progress{position:absolute;left:24px;right:24px;bottom:22px;height:7px;border-radius:99px;background:#1a222d;overflow:hidden}.tutorial-progress i{display:block;height:100%;width:0;background:#4c9cff;transition:width .1s linear}
-  .tutorial-footer{padding:14px 18px;border-top:1px solid #202a36;display:flex;justify-content:space-between;align-items:center;gap:12px}.tutorial-footer .small{font-size:12px;color:#7f8ea0}.tutorial-actions{display:flex;gap:10px;flex-wrap:wrap}.tutorial-actions button{min-width:160px}.tutorial-file-picker{display:none}.tutorial-error{color:#ff858f!important}.tutorial-loading{color:#ffd36e!important}.tutorial-ready{color:#7cf3ac!important}
-  .tutorial-model-tag{margin-top:12px;font-size:11px;color:#73849a;letter-spacing:.08em}
-  @media(max-width:720px){.tutorial-panel{height:96vh}.tutorial-head{padding:14px}.tutorial-info{left:14px;top:14px;right:14px;max-width:none}.tutorial-move{font-size:24px}.tutorial-footer{flex-direction:column;align-items:stretch}.tutorial-actions{width:100%}.tutorial-actions button{flex:1}.tutorial-step{text-align:center}}
+  .model-tutorial{position:fixed;inset:0;z-index:120;background:radial-gradient(circle at 50% 18%,rgba(66,126,255,.15),transparent 34%),linear-gradient(180deg,#05070b,#020307);display:none;color:#fff}
+  .model-tutorial.show{display:block}
+  .tutorial-shell{height:100%;display:flex;flex-direction:column;padding:18px 20px;max-width:1200px;margin:auto}
+  .tutorial-top{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:48px}
+  .tutorial-kicker{font-size:11px;font-weight:900;letter-spacing:.18em;color:#72a9ff}
+  .tutorial-progress{font-size:12px;color:#aeb8c7}
+  .tutorial-stage{position:relative;flex:1;min-height:0;margin:12px 0;border:1px solid #26303e;border-radius:24px;overflow:hidden;background:radial-gradient(circle at 50% 42%,#121b2a,#05070b 72%);box-shadow:0 24px 80px rgba(0,0,0,.5)}
+  #tutorial3d{position:absolute;inset:0;width:100%;height:100%}
+  .tutorial-caption{position:absolute;left:0;right:0;bottom:0;padding:20px 22px 22px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.82) 28%)}
+  .tutorial-action{font-size:clamp(28px,5vw,52px);font-weight:950;letter-spacing:-.03em;margin:0 0 8px}
+  .tutorial-desc{max-width:760px;color:#c5cedb;font-size:14px;line-height:1.7}
+  .tutorial-model-file{margin-top:7px;font-size:11px;color:#7f8da2}
+  .tutorial-status{position:absolute;top:16px;left:16px;padding:8px 11px;border-radius:999px;background:rgba(6,9,14,.75);border:1px solid #2a3544;color:#bcd2f2;font-size:11px;backdrop-filter:blur(6px)}
+  .tutorial-controls{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tutorial-controls-left,.tutorial-controls-right{display:flex;gap:10px}
+  .tutorial-controls button{min-width:110px}
+  .tutorial-controls .primary{min-width:170px}
+  .tutorial-note{font-size:11px;color:#77859a}
+  .tutorial-arrow{position:absolute;left:50%;top:47%;width:120px;height:220px;transform:translate(-50%,-50%);opacity:.9;pointer-events:none;display:none}
+  .tutorial-arrow.show{display:block}
+  .tutorial-arrow::before{content:"";position:absolute;left:50%;top:36px;bottom:0;width:14px;transform:translateX(-50%);border-radius:20px;background:linear-gradient(180deg,#ffde65,#ff8d4d)}
+  .tutorial-arrow::after{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:52px solid #ffde65;filter:drop-shadow(0 0 14px rgba(255,204,86,.35))}
+  @media(max-width:700px){.tutorial-shell{padding:10px}.tutorial-stage{border-radius:18px}.tutorial-desc{font-size:12px}.tutorial-controls{flex-wrap:wrap}.tutorial-controls-left,.tutorial-controls-right{width:100%}.tutorial-controls button{flex:1}.tutorial-controls .primary{width:100%}.tutorial-note{width:100%;order:3}}
+
 </style>
 </head>
 <body>
@@ -99,36 +108,47 @@ th:100%;height:auto;position:absolute;inset:0}
   <div class="start-panel">
     <div class="start-kicker">CAMERA MOTION BATTLE</div>
     <h1 class="start-title">PUNCH<br>ARENA</h1>
-    <div class="start-sub">パンチでモンスターを攻撃しながら、飛んでくる危険攻撃を身体を動かして回避するモーションゲーム。</div>
+    <div class="start-sub">手本の3Dモデルで動きを確認してから、あなた専用のパンチ判定を学習。学習後はパンチと回避でモンスターと戦います。</div>
     <div class="start-features">
-      <div class="start-feature"><b>🥊 パンチ</b><span>パンチの動きを最初に学習。あなたの動きに合わせて判定します。</span></div>
+      <div class="start-feature"><b>🥊 パンチ</b><span>5種類の動きを最初に学習。あなたのパンチに合わせて判定します。</span></div>
       <div class="start-feature"><b>⚠ 危険攻撃</b><span>赤い予告を見て、胸の⭕を危険ラインから外してください。</span></div>
       <div class="start-feature"><b>👾 バトル</b><span>パンチを当てて敵を倒し、次のモンスターへ進みます。</span></div>
     </div>
-    <button id="startGame" class="start-button primary">ゲーム開始</button>
-    <div class="start-note">初回は4種類のFBX手本を確認 → 5種類のパンチ登録の順で進みます</div>
+    <button id="startGame" class="start-button primary">チュートリアルを開始</button>
+    <div class="start-note">初回のみカメラ許可とパンチ学習が必要です</div>
   </div>
+
 </div>
 
-<div id="tutorialScreen" class="tutorial-screen">
-  <div class="tutorial-panel">
-    <div class="tutorial-head">
-      <div><div class="tutorial-kicker">PUNCH ARENA • TUTORIAL</div><div class="tutorial-title">手本の3Dモデルを見て動きを覚えよう</div></div>
-      <div id="tutorialStep" class="tutorial-step">1 / 4</div>
-    </div>
-    <div class="tutorial-main">
-      <canvas id="tutorial3D"></canvas>
-      <div class="tutorial-info">
-        <div id="tutorialMove" class="tutorial-move">左ストレート</div>
-        <div id="tutorialDesc" class="tutorial-desc">モデルが左腕を前へまっすぐ突き出します。腕の伸びと素早さをイメージしてください。</div>
-        <div id="tutorialHint" class="tutorial-hint">あなたのカメラ映像はまだ表示されません。</div>
-        <div class="tutorial-model-tag">FBX REFERENCE MODEL</div><div id="tutorialAssetStatus" class="tutorial-model-tag">FBX読み込み待機中…</div>
+<div id="modelTutorial" class="model-tutorial" aria-hidden="true">
+  <div class="tutorial-shell">
+    <div class="tutorial-top">
+      <div>
+        <div class="tutorial-kicker">TUTORIAL • MOTION GUIDE</div>
+        <div id="tutorialProgress" class="tutorial-progress">手本 1 / 5</div>
       </div>
-      <div class="tutorial-progress"><i id="tutorialProgressBar"></i></div>
+      <button id="tutorialClose" type="button">戻る</button>
     </div>
-    <div class="tutorial-footer">
-      <div id="tutorialFooterText" class="small">4種類のFBX手本を見終わったら、あなた自身のパンチ登録へ進みます。</div>
-      <div class="tutorial-actions"><button id="tutorialPickFBX">FBXを選択</button><button id="tutorialRetry">再読み込み</button><button id="tutorialNext" class="primary" disabled>次の手本</button><input id="tutorialFBXFiles" class="tutorial-file-picker" type="file" accept=".fbx" multiple></div>
+    <div class="tutorial-stage">
+      <canvas id="tutorial3d"></canvas>
+      <div id="tutorialStatus" class="tutorial-status">3D手本を読み込み中…</div>
+      <div id="tutorialUpperArrow" class="tutorial-arrow"></div>
+      <div class="tutorial-caption">
+        <h2 id="tutorialTitle" class="tutorial-action">右ストレート</h2>
+        <div id="tutorialDesc" class="tutorial-desc">手本モデルの動きを見てください。</div>
+        <div id="tutorialFile" class="tutorial-model-file">Migi_straight.fbx</div>
+      </div>
+    </div>
+    <div class="tutorial-controls">
+      <div class="tutorial-controls-left">
+        <button id="tutorialPrev" type="button">← 前へ</button>
+        <button id="tutorialReplay" type="button">↻ 再生し直す</button>
+        <button id="tutorialNext" type="button">次へ →</button>
+      </div>
+      <div class="tutorial-controls-right">
+        <div id="tutorialNote" class="tutorial-note">4つのFBX手本を確認したあと、実際のパンチ学習に進みます。</div>
+        <button id="tutorialPractice" class="primary" type="button">手本を見終えたら実践へ</button>
+      </div>
     </div>
   </div>
 </div>
@@ -183,20 +203,27 @@ th:100%;height:auto;position:absolute;inset:0}
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
   }
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script type="module">
-import * as THREE from "three";
-import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/FBXLoader.js";
-window.THREE = THREE;
-window.FBXLoader = FBXLoader;
-
+  window._threeReady = (async () => {
+    const THREE = await import('three');
+    const { FBXLoader } = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js');
+    window.THREE = THREE;
+    window.FBXLoader = FBXLoader;
+    return { THREE, FBXLoader };
+  })().catch(err => {
+    console.error('3D tutorial library error:', err);
+    throw err;
+  });
+</script>
+<script>
 (() => {
   "use strict";
 
@@ -225,25 +252,25 @@ window.FBXLoader = FBXLoader;
     startGame: document.getElementById("startGame"),
     startScreen: document.getElementById("startScreen"),
     exitGame: document.getElementById("exitGame"),
-    tutorialScreen: document.getElementById("tutorialScreen"),
-    tutorialCanvas: document.getElementById("tutorial3D"),
-    tutorialStep: document.getElementById("tutorialStep"),
-    tutorialMove: document.getElementById("tutorialMove"),
-    tutorialDesc: document.getElementById("tutorialDesc"),
-    tutorialHint: document.getElementById("tutorialHint"),
-    tutorialProgressBar: document.getElementById("tutorialProgressBar"),
-    tutorialNext: document.getElementById("tutorialNext"),
-    tutorialPickFBX: document.getElementById("tutorialPickFBX"),
-    tutorialRetry: document.getElementById("tutorialRetry"),
-    tutorialFBXFiles: document.getElementById("tutorialFBXFiles"),
-    tutorialFooterText: document.getElementById("tutorialFooterText"),
-    tutorialAssetStatus: document.getElementById("tutorialAssetStatus"),
     calReview: document.getElementById("calReview"),
     calReviewTitle: document.getElementById("calReviewTitle"),
     calReviewText: document.getElementById("calReviewText"),
     candidateGrid: document.getElementById("candidateGrid"),
     calSelectedLabel: document.getElementById("calSelectedLabel"),
-    calUseSelected: document.getElementById("calUseSelected")
+    calUseSelected: document.getElementById("calUseSelected"),
+    modelTutorial: document.getElementById("modelTutorial"),
+    tutorial3d: document.getElementById("tutorial3d"),
+    tutorialProgress: document.getElementById("tutorialProgress"),
+    tutorialTitle: document.getElementById("tutorialTitle"),
+    tutorialDesc: document.getElementById("tutorialDesc"),
+    tutorialFile: document.getElementById("tutorialFile"),
+    tutorialStatus: document.getElementById("tutorialStatus"),
+    tutorialPrev: document.getElementById("tutorialPrev"),
+    tutorialNext: document.getElementById("tutorialNext"),
+    tutorialReplay: document.getElementById("tutorialReplay"),
+    tutorialPractice: document.getElementById("tutorialPractice"),
+    tutorialClose: document.getElementById("tutorialClose"),
+    tutorialUpperArrow: document.getElementById("tutorialUpperArrow")
   };
 
   let stream = null, running = false, raf = 0;
@@ -275,262 +302,185 @@ window.FBXLoader = FBXLoader;
     bestRejected:null, eventBusyUntil:0
   };
 
-  const STORAGE_KEY='punchArenaCalibrationV5';
-  const VISIT_KEY='punchArenaVisitsV2';
+  const STORAGE_KEY='punchArenaCalibrationV4';
+  const VISIT_KEY='punchArenaVisitsV1';
   let visitData={count:0,lastVisitedAt:null,tutorialCompleted:false};
 
+  let tutorial3D = null;
+  let tutorial3DCamera = null;
+  let tutorial3DRenderer = null;
+  let tutorial3DScene = null;
+  let tutorial3DClock = null;
+  let tutorial3DMixer = null;
+  let tutorial3DModel = null;
+  let tutorial3DRequest = 0;
+  let tutorialIndex = 0;
+  let tutorialLoaded = false;
+  let tutorialAutoTimer = 0;
 
-  // 初回だけ表示するFBX手本チュートリアル。カメラはこの段階では一切起動しない。
-  // 手本は4本の指定FBX。進行は時間ではなく、必ずユーザー操作のみで行う。
-  // ファイルを相対パスで読めない環境(file://等)では、FBX選択ボタンから直接読み込める。
-  const tutorialMoves=[
-    {label:'右ストレート',desc:'Migi_straight.fbx を参照。右腕をまっすぐ前へ突き出す動きを確認します。',kind:'rightStraight',file:'Migi_straight.fbx'},
-    {label:'右フック',desc:'Migi_hook.fbx を参照。右腕を横方向へ振る動きを確認します。',kind:'rightHook',file:'Migi_hook.fbx'},
-    {label:'左ストレート',desc:'Hidari_staright.fbx を参照。左腕をまっすぐ前へ突き出す動きを確認します。',kind:'leftStraight',file:'Hidari_staright.fbx',fallback:'Hidari_straight.fbx'},
-    {label:'左フック',desc:'Hidari_hook.fbx を参照。左腕を横方向へ振る動きを確認します。',kind:'leftHook',file:'Hidari_hook.fbx'}
+  const MODEL_TUTORIALS = [
+    {label:'右ストレート', desc:'右腕をまっすぐ前へ。肩を残して拳を素早く伸ばします。', file:'Migi_straight.fbx', fallbacks:['Migi_straight.fbx'], kind:'model'},
+    {label:'右フック', desc:'右肘を少し曲げ、身体の横方向へ鋭く回します。', file:'Migi_hook.fbx', fallbacks:['Migi_hook.fbx'], kind:'model'},
+    {label:'左ストレート', desc:'左腕をまっすぐ前へ。拳を最短距離で素早く伸ばします。', file:'Hidari_staright.fbx', fallbacks:['Hidari_staright.fbx','Hidari_straight.fbx'], kind:'model'},
+    {label:'左フック', desc:'左肘を軽く曲げたまま横方向へ鋭く振ります。', file:'Hidari_hook.fbx', fallbacks:['Hidari_hook.fbx'], kind:'model'},
+    {label:'アッパー', desc:'下から上へ。胸の前からあご方向へ、拳を一気に突き上げます。', file:'手本FBXなし', fallbacks:[], kind:'upper'}
   ];
-  const tutorialState={active:false,index:0,startT:0,lastFrameT:0,raf:0,scene:null,camera:null,renderer:null,group:null,loader:null,currentObject:null,currentMixer:null,currentClips:[],loaded:new Map(),loading:new Set(),sources:new Map(),objectUrls:[],loadToken:0,ready:false};
 
-  function initTutorial3D(){
-    if(tutorialState.renderer || !window.THREE || !els.tutorialCanvas) return;
-    const THREE=window.THREE, c=els.tutorialCanvas;
-    tutorialState.scene=new THREE.Scene();
-    tutorialState.camera=new THREE.PerspectiveCamera(28,1,.1,100);
-    tutorialState.camera.position.set(0,1.25,6.2);
-    tutorialState.camera.lookAt(0,1.25,0);
-    tutorialState.renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
-    tutorialState.renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
-    tutorialState.renderer.setClearColor(0x07101a,0);
-    tutorialState.renderer.outputColorSpace=THREE.SRGBColorSpace;
-    tutorialState.loader=new window.FBXLoader();
-    const hemi=new THREE.HemisphereLight(0x9bc6ff,0x182231,2.2); tutorialState.scene.add(hemi);
-    const key=new THREE.DirectionalLight(0xffffff,2.6); key.position.set(2.4,4.5,3.8); tutorialState.scene.add(key);
-    const rim=new THREE.DirectionalLight(0x5ba7ff,1.4); rim.position.set(-3,2,-2); tutorialState.scene.add(rim);
-    const floor=new THREE.Mesh(new THREE.CircleGeometry(2.1,64),new THREE.MeshStandardMaterial({color:0x0d1622,roughness:.9,metalness:.05,transparent:true,opacity:.9}));
-    floor.rotation.x=-Math.PI/2; floor.position.y=0; tutorialState.scene.add(floor);
-    tutorialState.group=new THREE.Group(); tutorialState.scene.add(tutorialState.group);
-    resizeTutorial3D();
-    window.addEventListener('resize',resizeTutorial3D);
+  async function initModelTutorial(){
+    if(tutorialLoaded || !els.tutorial3d) return;
+    try{ if(window._threeReady) await window._threeReady; }catch(_e){ els.tutorialStatus.textContent='3D手本ライブラリを読み込めません'; return; }
+    if(!window.THREE || !window.FBXLoader) return;
+    tutorial3DScene = new THREE.Scene();
+    tutorial3DScene.background = new THREE.Color(0x06090f);
+    tutorial3DCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+    tutorial3DCamera.position.set(0, 1.55, 3.7);
+    tutorial3DRenderer = new THREE.WebGLRenderer({canvas:els.tutorial3d,antialias:true,alpha:false});
+    tutorial3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    tutorial3DRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    tutorial3DRenderer.shadowMap.enabled = true;
+    tutorial3DScene.add(new THREE.HemisphereLight(0x9db6d8,0x161a22,1.8));
+    const key=new THREE.DirectionalLight(0xffffff,2.4); key.position.set(3,5,4); key.castShadow=true; tutorial3DScene.add(key);
+    const rim=new THREE.DirectionalLight(0x5a82ff,1.2); rim.position.set(-4,2,-3); tutorial3DScene.add(rim);
+    const floor=new THREE.Mesh(new THREE.CylinderGeometry(2.7,2.7,0.06,64),new THREE.MeshStandardMaterial({color:0x111827,roughness:.9,metalness:.05}));
+    floor.position.y=-1.05; floor.receiveShadow=true; tutorial3DScene.add(floor);
+    const grid=new THREE.GridHelper(5,20,0x253044,0x162032); grid.position.y=-1.01; tutorial3DScene.add(grid);
+    tutorial3DClock=new THREE.Clock();
+    tutorialLoaded=true;
+    resizeModelTutorial();
+    requestAnimationFrame(modelTutorialLoop);
   }
 
-  function resizeTutorial3D(){
-    if(!tutorialState.renderer||!els.tutorialCanvas) return;
-    const r=els.tutorialCanvas.getBoundingClientRect(); const w=Math.max(1,r.width),h=Math.max(1,r.height);
-    tutorialState.renderer.setSize(w,h,false); tutorialState.camera.aspect=w/h; tutorialState.camera.updateProjectionMatrix();
+  function resizeModelTutorial(){
+    if(!tutorial3DRenderer||!els.tutorial3d) return;
+    const rect=els.tutorial3d.getBoundingClientRect();
+    const w=Math.max(1,Math.floor(rect.width)), h=Math.max(1,Math.floor(rect.height));
+    tutorial3DRenderer.setSize(w,h,false);
+    tutorial3DCamera.aspect=w/h; tutorial3DCamera.updateProjectionMatrix();
   }
 
-  function clearTutorialObject(){
-    if(tutorialState.currentMixer){ try{tutorialState.currentMixer.stopAllAction();}catch(_e){} }
-    tutorialState.currentMixer=null; tutorialState.currentClips=[];
-    if(tutorialState.currentObject && tutorialState.group){
-      tutorialState.group.remove(tutorialState.currentObject);
-      tutorialState.currentObject=null;
+  function clearTutorialModel(){
+    if(tutorial3DMixer) tutorial3DMixer.stopAllAction();
+    if(tutorial3DModel){
+      tutorial3DModel.traverse(o=>{if(o.isMesh){o.geometry?.dispose?.(); if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose?.()); else o.material.dispose?.();}}});
+      tutorial3DScene.remove(tutorial3DModel);
+      tutorial3DModel=null;
     }
+    tutorial3DMixer=null;
   }
 
-  function frameFBXObject(obj){
-    const THREE=window.THREE;
-    obj.updateMatrixWorld(true);
-    let box=new THREE.Box3().setFromObject(obj);
-    if(box.isEmpty()) throw new Error('FBXのモデルサイズを取得できません');
-    const height=Math.max(box.max.y-box.min.y,0.001);
-    const scale=3.0/height;
+  function fitTutorialModel(obj){
+    const box=new THREE.Box3().setFromObject(obj), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+    const max=Math.max(size.x,size.y,size.z)||1;
+    const scale=1.95/max;
     obj.scale.setScalar(scale);
-    obj.updateMatrixWorld(true);
-    box=new THREE.Box3().setFromObject(obj);
-    const center=box.getCenter(new THREE.Vector3());
-    obj.position.x-=center.x;
-    obj.position.z-=center.z;
-    obj.position.y-=box.min.y;
-    obj.updateMatrixWorld(true);
-
-    box=new THREE.Box3().setFromObject(obj);
-    const size=box.getSize(new THREE.Vector3());
-    const finalCenter=box.getCenter(new THREE.Vector3());
-    const halfFov=THREE.MathUtils.degToRad(28/2);
-    const distance=Math.max(4.0,(Math.max(size.x,size.y)*0.70)/Math.tan(halfFov));
-    tutorialState.camera.position.set(0,Math.max(1.35,size.y*0.50),distance);
-    tutorialState.camera.near=0.01;
-    tutorialState.camera.far=Math.max(100,distance*12);
-    tutorialState.camera.lookAt(0,size.y*0.48,0);
-    tutorialState.camera.updateProjectionMatrix();
+    const box2=new THREE.Box3().setFromObject(obj), c2=box2.getCenter(new THREE.Vector3()), s2=box2.getSize(new THREE.Vector3());
+    obj.position.x-=c2.x; obj.position.z-=c2.z; obj.position.y-=box2.min.y+1.0;
+    tutorial3DCamera.position.set(0,1.05,Math.max(2.7,Math.min(5.0,2.2+s2.z*1.4)));
+    tutorial3DCamera.lookAt(0,0.35,0);
   }
 
-  async function loadFBX(url){
-    return new Promise((resolve,reject)=>{
-      if(tutorialState.loaded.has(url)){ resolve(tutorialState.loaded.get(url).clone(true)); return; }
-      if(tutorialState.loading.has(url)){
-        const started=performance.now();
-        const poll=()=>{
-          if(tutorialState.loaded.has(url)){ resolve(tutorialState.loaded.get(url).clone(true)); return; }
-          if(performance.now()-started>12000){ reject(new Error('FBX読み込みがタイムアウトしました')); return; }
-          setTimeout(poll,80);
-        };
-        poll();
-        return;
-      }
-      tutorialState.loading.add(url);
-      tutorialState.loader.load(url,(obj)=>{
-        tutorialState.loading.delete(url);
-        tutorialState.loaded.set(url,obj);
-        resolve(obj.clone(true));
-      },undefined,(err)=>{
-        tutorialState.loading.delete(url);
-        reject(err instanceof Error ? err : new Error('FBXを読み込めませんでした'));
-      });
-    });
+  function createUppercutGuide(){
+    const group=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.CapsuleGeometry(.23,.95,8,16),new THREE.MeshStandardMaterial({color:0x4a72ad,roughness:.75}));
+    body.position.y=-.18; body.castShadow=true; group.add(body);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.28,20,20),new THREE.MeshStandardMaterial({color:0xe2b28d,roughness:.78})); head.position.y=.72; head.castShadow=true; group.add(head);
+    const arrow=new THREE.Mesh(new THREE.ConeGeometry(.17,.48,16),new THREE.MeshStandardMaterial({color:0xffd75a,emissive:0x5b3f00,emissiveIntensity:.35})); arrow.rotation.z=Math.PI; arrow.position.set(.48,.15,0); arrow.castShadow=true; group.add(arrow);
+    const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.8,12),new THREE.MeshStandardMaterial({color:0xff8e4d,emissive:0x3a1800,emissiveIntensity:.25})); shaft.position.set(.48,-.22,0); group.add(shaft);
+    group.userData.upperGuide=true;
+    return group;
   }
 
-  function getTutorialSourcesForMove(move){
-    const names=[move.file,move.fallback].filter(Boolean);
-    return names.map(name=>({name,url:tutorialState.sources.get(name)||name}));
-  }
-
-  function setTutorialStatus(text,kind=''){ 
-    els.tutorialAssetStatus.textContent=text;
-    els.tutorialAssetStatus.classList.remove('tutorial-error','tutorial-loading','tutorial-ready');
-    if(kind) els.tutorialAssetStatus.classList.add(`tutorial-${kind}`);
-  }
-
-  function prepareTutorialFileMap(files){
-    let count=0;
-    for(const file of files){
-      const lower=file.name.toLowerCase();
-      const accepted=tutorialMoves.some(m=>[m.file,m.fallback].filter(Boolean).map(x=>x.toLowerCase()).includes(lower));
-      if(!accepted) continue;
-      const old=tutorialState.sources.get(file.name);
-      if(old && old.startsWith('blob:')) URL.revokeObjectURL(old);
-      const url=URL.createObjectURL(file);
-      tutorialState.sources.set(file.name,url);
-      tutorialState.objectUrls.push(url);
-      count++;
+  async function loadTutorialStep(index){
+    tutorialIndex=Math.max(0,Math.min(MODEL_TUTORIALS.length-1,index));
+    const step=MODEL_TUTORIALS[tutorialIndex];
+    els.tutorialProgress.textContent=`手本 ${tutorialIndex+1} / ${MODEL_TUTORIALS.length}`;
+    els.tutorialTitle.textContent=step.label;
+    els.tutorialDesc.textContent=step.desc;
+    els.tutorialFile.textContent=step.file;
+    els.tutorialUpperArrow.classList.toggle('show',step.kind==='upper');
+    els.tutorialPrev.disabled=tutorialIndex===0;
+    els.tutorialNext.disabled=tutorialIndex===MODEL_TUTORIALS.length-1;
+    els.tutorialPractice.textContent=tutorialIndex===MODEL_TUTORIALS.length-1?'手本を見終えた → パンチ学習へ':'最後まで見る → パンチ学習へ';
+    tutorial3DRequest++;
+    const req=tutorial3DRequest;
+    clearTimeout(tutorialAutoTimer);
+    clearTutorialModel();
+    if(step.kind==='upper'){
+      const g=createUppercutGuide(); tutorial3DModel=g; tutorial3DScene.add(g); fitTutorialModel(g);
+      els.tutorialStatus.textContent='アッパー：3D手本FBXは未指定。動きの方向を表示しています';
+      return;
     }
-    return count;
-  }
-
-  async function showTutorialFBX(index){
-    const move=tutorialMoves[index];
-    const token=++tutorialState.loadToken;
-    initTutorial3D();
-    resizeTutorial3D();
-    clearTutorialObject();
-    tutorialState.ready=false;
-    els.tutorialNext.disabled=true;
-    els.tutorialRetry.disabled=true;
-    setTutorialStatus(`${move.file} を読み込み中…`,'loading');
-    els.tutorialHint.textContent='モデルを読み込んでいます。読み込み完了までは次へ進めません。';
-    let obj=null; let usedName=''; let lastErr=null;
-    for(const source of getTutorialSourcesForMove(move)){
-      try{
-        obj=await loadFBX(source.url);
-        usedName=source.name;
-        break;
-      }catch(err){ lastErr=err; }
-      if(tutorialState.loadToken!==token) return false;
-    }
-    if(tutorialState.loadToken!==token) return false;
-    if(!obj){
-      setTutorialStatus(`❌ ${move.file} を読み込めませんでした`,'error');
-      els.tutorialHint.textContent='「FBXを選択」で4本のFBXを選ぶか、ファイル名とHTMLの場所を確認してください。失敗中は次へ進めません。';
-      els.tutorialRetry.disabled=false;
-      console.warn('Tutorial FBX load failed:', lastErr);
-      return false;
-    }
+    els.tutorialStatus.textContent=`${step.file} を読み込み中…`;
     try{
-      obj.traverse(o=>{
-        if(o.isMesh){
-          o.castShadow=false; o.receiveShadow=false; o.visible=true;
-          if(o.material){
-            const mats=Array.isArray(o.material)?o.material:[o.material];
-            mats.forEach(m=>{ if(m){m.needsUpdate=true; m.visible=true;} });
-          }
-        }
-      });
-      frameFBXObject(obj);
-    }catch(err){
-      setTutorialStatus('❌ FBXは読み込めましたが表示準備に失敗しました','error');
-      els.tutorialHint.textContent='このモデルの階層・サイズを処理できませんでした。別のFBXを確認してください。';
-      els.tutorialRetry.disabled=false;
-      console.warn('Tutorial FBX setup failed:',err);
-      return false;
+      const loader=new FBXLoader();
+      const model=await new Promise((resolve,reject)=>loader.load(step.file,resolve,undefined,reject));
+      if(req!==tutorial3DRequest) return;
+      tutorial3DModel=model;
+      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true; if(o.material){o.material.side=THREE.FrontSide;}}});
+      tutorial3DScene.add(model); fitTutorialModel(model);
+      if(Array.isArray(model.animations)&&model.animations.length){
+        tutorial3DMixer=new THREE.AnimationMixer(model);
+        const clip=model.animations[0];
+        const action=tutorial3DMixer.clipAction(clip); action.reset().play();
+        els.tutorialStatus.textContent='3D手本 再生中';
+      }else{
+        els.tutorialStatus.textContent='3Dモデル読み込み完了（アニメーションなし）';
+      }
+    }catch(e){
+      if(req!==tutorial3DRequest) return;
+      // fallback names for the user's exact file naming, then a clear placeholder.
+      let fallbackLoaded=false;
+      for(const file of step.fallbacks.slice(1)){
+        try{
+          const loader=new FBXLoader();
+          const model=await new Promise((resolve,reject)=>loader.load(file,resolve,undefined,reject));
+          if(req!==tutorial3DRequest) return;
+          tutorial3DModel=model; model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); tutorial3DScene.add(model); fitTutorialModel(model);
+          if(model.animations?.length){tutorial3DMixer=new THREE.AnimationMixer(model);tutorial3DMixer.clipAction(model.animations[0]).play();}
+          els.tutorialStatus.textContent=`${file} を再生中`;
+          fallbackLoaded=true; break;
+        }catch(_e){}
+      }
+      if(!fallbackLoaded){
+        const badge=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.18,48),new THREE.MeshStandardMaterial({color:0x202938,roughness:.9}));
+        badge.position.y=-.9; tutorial3DScene.add(badge); tutorial3DModel=badge;
+        els.tutorialStatus.textContent=`FBXを読み込めません：${step.file}`;
+      }
     }
-    tutorialState.currentObject=obj;
-    tutorialState.group.add(obj);
-    setTutorialStatus(`✓ ${usedName}`,'ready');
-    if(obj.animations && obj.animations.length){
-      tutorialState.currentClips=obj.animations;
-      tutorialState.currentMixer=new window.THREE.AnimationMixer(obj);
-      const clip=obj.animations[0];
-      const action=tutorialState.currentMixer.clipAction(clip);
-      action.reset().setLoop(window.THREE.LoopRepeat,Infinity).play();
-      els.tutorialHint.textContent='FBXアニメーションを再生中です。確認し終わったら自分で「次の手本」を押してください。';
-    }else{
-      tutorialState.currentClips=[];
-      els.tutorialHint.textContent='FBXモデルは表示できましたが、埋め込みアニメーションはありません。確認後に手動で次へ進んでください。';
+  }
+
+  async function openModelTutorial(){
+    await initModelTutorial();
+    tutorialIndex=0;
+    els.modelTutorial.classList.add('show');
+    els.modelTutorial.setAttribute('aria-hidden','false');
+    if(els.startScreen) els.startScreen.style.display='none';
+    loadTutorialStep(0);
+  }
+
+  function closeModelTutorial(){
+    els.modelTutorial.classList.remove('show');
+    els.modelTutorial.setAttribute('aria-hidden','true');
+    clearTutorialModel();
+  }
+
+  function completeModelTutorial(){
+    closeModelTutorial();
+    startCameraAndGame(true);
+  }
+
+  function modelTutorialLoop(){
+    requestAnimationFrame(modelTutorialLoop);
+    if(!tutorial3DRenderer||!tutorial3DScene||!tutorial3DCamera) return;
+    const dt=tutorial3DClock?.getDelta?.()||0.016;
+    if(tutorial3DMixer) tutorial3DMixer.update(dt);
+    if(tutorial3DModel?.userData?.upperGuide){
+      const t=performance.now()*0.001;
+      tutorial3DModel.rotation.y=Math.sin(t*.45)*.15;
+      tutorial3DModel.children.forEach((c,i)=>{if(i===2||i===3)c.position.y += Math.sin(t*2.2+i)*0.012;});
     }
-    tutorialState.ready=true;
-    els.tutorialNext.disabled=false;
-    els.tutorialRetry.disabled=false;
-    return true;
-  }
-
-  function renderTutorial(now){
-    if(!tutorialState.active || !tutorialState.renderer) return;
-    const dt=tutorialState.lastFrameT ? Math.min(.05,(now-tutorialState.lastFrameT)/1000) : 0;
-    tutorialState.lastFrameT=now;
-    if(tutorialState.currentMixer) tutorialState.currentMixer.update(dt);
-    tutorialState.renderer.render(tutorialState.scene,tutorialState.camera);
-    tutorialState.raf=requestAnimationFrame(renderTutorial);
-  }
-
-  function updateTutorialUI(){
-    const mv=tutorialMoves[tutorialState.index];
-    els.tutorialStep.textContent=`${tutorialState.index+1} / ${tutorialMoves.length}`;
-    els.tutorialMove.textContent=mv.label;
-    els.tutorialDesc.textContent=mv.desc;
-    els.tutorialProgressBar.style.width='100%';
-    els.tutorialNext.textContent=tutorialState.index===tutorialMoves.length-1?'パンチ登録へ進む':'次の手本';
-    els.tutorialNext.disabled=true;
-    els.tutorialRetry.disabled=true;
-    els.tutorialFooterText.textContent=tutorialState.index===tutorialMoves.length-1
-      ? '最後の手本を確認したら、「パンチ登録へ進む」を押してください。自動では進みません。'
-      : '手本を確認したら、「次の手本」を押してください。時間では進みません。';
-    setTutorialStatus('FBX読み込み待機中…','loading');
-  }
-
-  async function startTutorial(){
-    els.startScreen.style.display='none';
-    els.tutorialScreen.classList.add('show');
-    tutorialState.active=true;
-    tutorialState.ready=false;
-    tutorialState.index=0;
-    tutorialState.startT=performance.now();
-    tutorialState.lastFrameT=performance.now();
-    updateTutorialUI();
-    requestAnimationFrame(()=>{ initTutorial3D(); resizeTutorial3D(); });
-    await showTutorialFBX(0);
-    resizeTutorial3D();
-    if(tutorialState.raf) cancelAnimationFrame(tutorialState.raf);
-    tutorialState.raf=requestAnimationFrame(renderTutorial);
-  }
-
-  function finishTutorialAndStart(){
-    if(!tutorialState.ready) return;
-    tutorialState.active=false;
-    tutorialState.ready=false;
-    if(tutorialState.raf) cancelAnimationFrame(tutorialState.raf);
-    tutorialState.raf=0;
-    clearTutorialObject();
-    els.tutorialScreen.classList.remove('show');
-    // 「チュートリアル視聴済み」はここでは確定しない。5種のパンチ登録が完了してから保存する。
-    start();
-  }
-
-
-  function cleanupTutorialSources(){
-    for(const u of tutorialState.objectUrls){ try{URL.revokeObjectURL(u);}catch(_e){} }
-    tutorialState.objectUrls=[];
-    tutorialState.sources.clear();
+    if(tutorial3DModel && !tutorial3DModel.userData?.upperGuide){tutorial3DModel.rotation.y += dt*0.22;}
+    tutorial3DRenderer.render(tutorial3DScene,tutorial3DCamera);
   }
 
   function loadPersistentTraining(){
@@ -538,7 +488,7 @@ window.FBXLoader = FBXLoader;
       const raw=localStorage.getItem(STORAGE_KEY);
       if(!raw) return false;
       const saved=JSON.parse(raw);
-      if(!saved || Number(saved.version)!==5 || !Array.isArray(saved.profiles) || saved.profiles.length!==5) return false;
+      if(!saved || !Array.isArray(saved.profiles) || saved.profiles.length!==5) return false;
       if(!saved.profiles.every(p=>p && p.kind && Number.isFinite(Number(p.peakSpeed)))) return false;
       calibration.profiles=saved.profiles;
       calibration.trained=true;
@@ -572,7 +522,7 @@ window.FBXLoader = FBXLoader;
 
   function savePersistentTraining(){
     try{
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({version:5,savedAt:new Date().toISOString(),profiles:calibration.profiles}));
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({version:4,savedAt:new Date().toISOString(),profiles:calibration.profiles}));
       markTutorialComplete();
     }catch(_e){}
   }
@@ -763,24 +713,12 @@ window.FBXLoader = FBXLoader;
     els.calReviewTitle.textContent=`${calibration.labels[calibration.index]}：候補を選択`;
     els.calReviewText.textContent=calibration.candidates.length
       ? `この10秒間から短く録画した${calibration.candidates.length}件です。一番この技らしい1件を選んでください。`
-      : '明確な候補は取得できませんでした。時間内の情報から作る救済候補を採用できます。';
+      : '候補が録画できませんでした。時間切れのため、自動基準を作成して次へ進めます。';
     els.candidateGrid.innerHTML='';
     if(!calibration.candidates.length){
-      const [wantSide,wantKind]=expectedCalibration(calibration.index);
-      const fallback={
-        side:wantSide==='any'?'right':wantSide,
-        kind:wantKind,
-        score:0.60,
-        features:{peakSpeed:0.58,peakExtension:0.96,peakAccel:0.10,dx:0,dy:0,dxAbs:0.04,dyAbs:0.04,forward:0.035,extGain:0.055,duration:260,visibility:0.75,horizontalRatio:0.5,verticalRatio:0.5,forwardRatio:0.35,meanSpeed:0.42,postPeak:0.02,peakAge:120,normDx:0.12,normDy:0.12,normForward:0.20,torsoScale:0.18}
-      };
-      calibration.candidates=[fallback];
-      const e=document.createElement('div');
-      e.className='candidate-empty';
-      e.textContent='動画候補を取得できませんでした。自動作成した救済候補を使います。';
+      const e=document.createElement('div'); e.className='candidate-empty'; e.textContent='候補なし：次の学習へ自動で進みます。';
       els.candidateGrid.appendChild(e);
-      calibration.selectedCandidate=0;
-      els.calSelectedLabel.textContent='救済候補を使用';
-      els.calUseSelected.disabled=false;
+      els.calUseSelected.disabled=true;
     }else{
       calibration.candidates.sort((a,b)=>b.score-a.score);
       calibration.candidates.forEach((c,i)=>els.candidateGrid.appendChild(candidateCard(c,i)));
@@ -1302,14 +1240,14 @@ window.FBXLoader = FBXLoader;
     const haveShoulders=ls&&rs;
     if(!haveShoulders) return null;
     const sc={x:(ls.x+rs.x)*0.5,y:(ls.y+rs.y)*0.5};
-    let x=sc.x, y=sc.y+0.115;
+    let x=sc.x, y=sc.y+0.085;
     if(lh&&rh){
       const hc={x:(lh.x+rh.x)*0.5,y:(lh.y+rh.y)*0.5};
-      x=lerp(sc.x,hc.x,0.18);
-      y=lerp(sc.y,hc.y,0.32);
+      x=lerp(sc.x,hc.x,0.12);
+      y=lerp(sc.y,hc.y,0.18);
     }
     // 胸の基準点を少し上へ寄せて、みぞおち・腹を避ける。
-    y-=0.018;
+    y-=0.008;
     if(!chestMarker){
       chestMarker={x,y};
       chestMarkerVelocity={x:0,y:0};
@@ -1977,7 +1915,7 @@ window.FBXLoader = FBXLoader;
     raf=requestAnimationFrame(loop);
   }
 
-  async function start(){
+  async function startCameraAndGame(forceTraining=false){
     if(running)return;
     try{
       stream=await navigator.mediaDevices.getUserMedia({
@@ -1988,32 +1926,21 @@ window.FBXLoader = FBXLoader;
       await video.play();
       running=true;
       if(els.startScreen) els.startScreen.style.display="none";
-      poseBusy=false;
-      poseErrorCount=0;
-      poseLastErrorT=0;
-      els.start.disabled=true;
-      els.stop.disabled=false;
-      els.calibrate.disabled=true;
+      poseBusy=false; poseErrorCount=0; poseLastErrorT=0;
+      els.start.disabled=true; els.stop.disabled=false; els.calibrate.disabled=true;
       closeCalibrationReview();
       resetArm(arms.left); resetArm(arms.right);
       const resumed=loadPersistentTraining();
-      if(resumed){
-        calibration.active=false;
-        calibration.review=false;
-        els.status.textContent='保存済みパンチデータを読み込み中';
+      if(resumed && !forceTraining){
+        calibration.active=false; calibration.review=false;
+        els.status.textContent='保存済みパンチデータを使用';
         els.scoreText.textContent='前回のチュートリアル結果をそのまま使用します';
       }else{
         startCalibration(performance.now());
       }
-      chestMarker = null;
-      chestMarkerVelocity={x:0,y:0};
-      chestMarkerLastT=0;
+      chestMarker=null; chestMarkerVelocity={x:0,y:0}; chestMarkerLastT=0;
       resetPlayer();
-      enemyAttack.state="idle";
-      enemyAttack.gameStartT=performance.now();
-      enemyAttack.attacksStarted=0;
-      enemyAttack.lastPatternId=-1;
-      enemyAttack.nextAttackT=performance.now()+2600;
+      enemyAttack.state="idle"; enemyAttack.gameStartT=performance.now(); enemyAttack.attacksStarted=0; enemyAttack.lastPatternId=-1; enemyAttack.nextAttackT=performance.now()+2600;
       if(monster.hp<=0 || monster.defeated) spawnMonster();
       loop();
     }catch(e){
@@ -2021,6 +1948,15 @@ window.FBXLoader = FBXLoader;
       els.status.textContent="カメラを開始できません";
       if(els.startScreen) els.startScreen.style.display="flex";
       alert("カメラを使用できませんでした。ブラウザのカメラ許可と、安全な接続(HTTPS/localhost)を確認してください。");
+    }
+  }
+
+  function start(){
+    const saved=hasPersistentTraining();
+    if(!saved){
+      openModelTutorial();
+    }else{
+      startCameraAndGame(false);
     }
   }
 
@@ -2064,53 +2000,26 @@ window.FBXLoader = FBXLoader;
   if(hasPersistentTraining()){
     visitData.tutorialCompleted=true;
     els.startGame.textContent='ゲーム開始（保存データを使用）';
-    els.startScreen.querySelector('.start-note').textContent='前回までの5種類パンチデータをそのまま使用します。';
+    els.startScreen.querySelector('.start-note').textContent='前回のチュートリアル済み。保存したパンチデータをそのまま使用します';
   }else{
-    els.startGame.textContent='チュートリアル開始';
-    els.startScreen.querySelector('.start-note').textContent='初回はカメラを使わず、4種類の3D/FBX手本を確認してから5種類のパンチ登録を行います。';
+    els.startGame.textContent='チュートリアルを開始';
+    els.startScreen.querySelector('.start-note').textContent='初回は3D手本を見たあと、カメラでパンチ学習を行います';
   }
   spawnMonster();
   updateCalibrationText();
 
   els.start.addEventListener("click",start);
-  els.startGame.addEventListener("click",()=>{
-    if(hasPersistentTraining()){ els.startScreen.style.display="none"; start(); }
-    else { startTutorial(); }
-  });
-  els.tutorialNext.addEventListener("click",async()=>{
-    if(els.tutorialNext.disabled || !tutorialState.ready) return;
-    const last=tutorialState.index===tutorialMoves.length-1;
-    if(last){ finishTutorialAndStart(); return; }
-    tutorialState.ready=false;
-    tutorialState.index=Math.min(tutorialMoves.length-1,tutorialState.index+1);
-    tutorialState.startT=performance.now();
-    tutorialState.lastFrameT=performance.now();
-    updateTutorialUI();
-    await showTutorialFBX(tutorialState.index);
-    resizeTutorial3D();
-  });
-  els.tutorialRetry.addEventListener("click",async()=>{
-    if(!tutorialState.active) return;
-    await showTutorialFBX(tutorialState.index);
-    resizeTutorial3D();
-  });
-  els.tutorialPickFBX.addEventListener("click",()=>els.tutorialFBXFiles.click());
-  els.tutorialFBXFiles.addEventListener("change",async(e)=>{
-    const files=Array.from(e.target.files||[]);
-    const count=prepareTutorialFileMap(files);
-    if(count===0){
-      setTutorialStatus('選択されたFBXのファイル名が一致しません','error');
-      return;
-    }
-    setTutorialStatus(`${count}本のFBXを登録しました。現在の手本を読み込みます。`,'loading');
-    await showTutorialFBX(tutorialState.index);
-    resizeTutorial3D();
-    e.target.value='';
-  });
+  els.startGame.addEventListener("click",()=>{ void start(); });
   els.exitGame.addEventListener("click",()=>{ stop(); els.startScreen.style.display="flex"; });
   els.stop.addEventListener("click",stop);
   els.calUseSelected.addEventListener("click",()=>saveSelectedCalibration(performance.now()));
-  window.addEventListener("beforeunload",()=>{ stop(); cleanupTutorialSources(); });
+  els.tutorialPrev.addEventListener('click',()=>loadTutorialStep(tutorialIndex-1));
+  els.tutorialNext.addEventListener('click',()=>loadTutorialStep(tutorialIndex+1));
+  els.tutorialReplay.addEventListener('click',()=>loadTutorialStep(tutorialIndex));
+  els.tutorialPractice.addEventListener('click',()=>completeModelTutorial());
+  els.tutorialClose.addEventListener('click',()=>{closeModelTutorial(); els.startScreen.style.display='flex';});
+  window.addEventListener('resize',resizeModelTutorial);
+  window.addEventListener("beforeunload",stop);
 })();
 </script>
 </body>
