@@ -334,13 +334,17 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorial3DScene.background = new THREE.Color(0x06090f);
     tutorial3DCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
     tutorial3DCamera.position.set(0, 1.55, 3.7);
-    tutorial3DRenderer = new THREE.WebGLRenderer({canvas:els.tutorial3d,antialias:true,alpha:false});
+    tutorial3DRenderer = new THREE.WebGLRenderer({canvas:els.tutorial3d,antialias:true,alpha:false,powerPreference:'high-performance'});
     tutorial3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     tutorial3DRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    tutorial3DRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    tutorial3DRenderer.toneMappingExposure = 1.12;
     tutorial3DRenderer.shadowMap.enabled = true;
-    tutorial3DScene.add(new THREE.HemisphereLight(0x9db6d8,0x161a22,1.8));
-    const key=new THREE.DirectionalLight(0xffffff,2.4); key.position.set(3,5,4); key.castShadow=true; tutorial3DScene.add(key);
-    const rim=new THREE.DirectionalLight(0x5a82ff,1.2); rim.position.set(-4,2,-3); tutorial3DScene.add(rim);
+    tutorial3DRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    tutorial3DScene.add(new THREE.HemisphereLight(0xb8cdf0,0x10131b,2.2));
+    const key=new THREE.DirectionalLight(0xffffff,3.2); key.position.set(3,5,4); key.castShadow=true; tutorial3DScene.add(key);
+    const fill=new THREE.DirectionalLight(0x88aaff,1.7); fill.position.set(-4,2,1); tutorial3DScene.add(fill);
+    const rim=new THREE.DirectionalLight(0x6a84ff,1.6); rim.position.set(-3,3,-4); tutorial3DScene.add(rim);
     const floor=new THREE.Mesh(new THREE.CylinderGeometry(2.7,2.7,0.06,64),new THREE.MeshStandardMaterial({color:0x111827,roughness:.9,metalness:.05}));
     floor.position.y=-1.05; floor.receiveShadow=true; tutorial3DScene.add(floor);
     const grid=new THREE.GridHelper(5,20,0x253044,0x162032); grid.position.y=-1.01; tutorial3DScene.add(grid);
@@ -351,11 +355,20 @@ th:100%;height:auto;position:absolute;inset:0}
   }
 
   function resizeModelTutorial(){
-    if(!tutorial3DRenderer||!els.tutorial3d) return;
+    if(!tutorial3DRenderer||!els.tutorial3d||!tutorial3DCamera) return;
     const rect=els.tutorial3d.getBoundingClientRect();
     const w=Math.max(1,Math.floor(rect.width)), h=Math.max(1,Math.floor(rect.height));
+    // Safari/iPad対策: canvasのCSSサイズとWebGL内部解像度を明示的に同期。
+    tutorial3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     tutorial3DRenderer.setSize(w,h,false);
-    tutorial3DCamera.aspect=w/h; tutorial3DCamera.updateProjectionMatrix();
+    tutorial3DCamera.aspect=w/h;
+    tutorial3DCamera.updateProjectionMatrix();
+  }
+
+  window.addEventListener('resize', resizeModelTutorial, {passive:true});
+  if(window.ResizeObserver){
+    const ro = new ResizeObserver(() => resizeModelTutorial());
+    if(els.tutorial3d) ro.observe(els.tutorial3d);
   }
 
   function clearTutorialModel(){
@@ -368,16 +381,68 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorial3DMixer=null;
   }
 
-  function fitTutorialModel(obj){
-    const box=new THREE.Box3().setFromObject(obj), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
-    const max=Math.max(size.x,size.y,size.z)||1;
-    const scale=1.95/max;
-    obj.scale.setScalar(scale);
-    const box2=new THREE.Box3().setFromObject(obj), c2=box2.getCenter(new THREE.Vector3()), s2=box2.getSize(new THREE.Vector3());
-    obj.position.x-=c2.x; obj.position.z-=c2.z; obj.position.y-=box2.min.y+1.0;
-    tutorial3DCamera.position.set(0,1.05,Math.max(2.7,Math.min(5.0,2.2+s2.z*1.4)));
-    tutorial3DCamera.lookAt(0,0.35,0);
+  function prepareTutorialModel(model){
+    if(!model) return;
+    model.visible=true;
+    model.traverse(o=>{
+      if(!o.isMesh) return;
+      o.visible=true;
+      // FBXの材質やテクスチャがSafariで解決できない場合でも、
+      // チュートリアル用のシンプルな材質へ置き換えてモデル自体を確実に見せる。
+      const mats=Array.isArray(o.material)?o.material:[o.material];
+      o.material=mats.map(m=>{
+        if(!m) return new THREE.MeshStandardMaterial({color:0xd7deea,roughness:.72,metalness:.05});
+        const color=(m.color && m.color.isColor)?m.color.clone():new THREE.Color(0xd7deea);
+        if(color.r+color.g+color.b < 0.10) color.setHex(0xaeb9c9);
+        const nm=new THREE.MeshStandardMaterial({
+          color,
+          roughness:typeof m.roughness==='number'?Math.max(.45,Math.min(1,m.roughness)):.72,
+          metalness:typeof m.metalness==='number'?Math.min(.2,m.metalness):.03,
+          map:m.map||null,
+          transparent:false,
+          opacity:1,
+          side:THREE.DoubleSide
+        });
+        return nm;
+      });
+      o.frustumCulled=false;
+      o.castShadow=true; o.receiveShadow=true;
+    });
   }
+
+  function fitTutorialModel(obj){
+    if(!obj || !tutorial3DCamera) return;
+    obj.rotation.set(0, Math.PI, 0);
+    obj.scale.setScalar(1);
+    obj.updateMatrixWorld(true);
+
+    const rawBox=new THREE.Box3().setFromObject(obj);
+    const rawSize=rawBox.getSize(new THREE.Vector3());
+    const rawCenter=rawBox.getCenter(new THREE.Vector3());
+    const rawMax=Math.max(rawSize.x,rawSize.y,rawSize.z)||1;
+    obj.scale.setScalar(1.9/rawMax);
+    obj.updateMatrixWorld(true);
+
+    const box=new THREE.Box3().setFromObject(obj);
+    const size=box.getSize(new THREE.Vector3());
+    const center=box.getCenter(new THREE.Vector3());
+    obj.position.x -= center.x;
+    obj.position.z -= center.z;
+    obj.position.y += -box.min.y - 0.98;
+    obj.updateMatrixWorld(true);
+
+    const box3=new THREE.Box3().setFromObject(obj);
+    const h=Math.max(box3.max.y-box3.min.y,1);
+    const targetY=box3.min.y + h*0.52;
+    const fovRad=(tutorial3DCamera.fov*Math.PI/180);
+    const distance=Math.max(2.8,Math.min(4.8,(h*0.58/Math.tan(fovRad/2))*1.18));
+    tutorial3DCamera.position.set(0,targetY+0.02,distance);
+    tutorial3DCamera.near=0.05;
+    tutorial3DCamera.far=100;
+    tutorial3DCamera.lookAt(0,targetY,0);
+    tutorial3DCamera.updateProjectionMatrix();
+  }
+
 
   function createUppercutGuide(){
     const group=new THREE.Group();
@@ -416,15 +481,16 @@ th:100%;height:auto;position:absolute;inset:0}
       const model=await new Promise((resolve,reject)=>loader.load(step.file,resolve,undefined,reject));
       if(req!==tutorial3DRequest) return;
       tutorial3DModel=model;
+      prepareTutorialModel(model);
       model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true; if(o.material){o.material.side=THREE.FrontSide;}}});
-      tutorial3DScene.add(model); fitTutorialModel(model);
+      tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial(); resizeModelTutorial();
       if(Array.isArray(model.animations)&&model.animations.length){
         tutorial3DMixer=new THREE.AnimationMixer(model);
         const clip=model.animations[0];
         const action=tutorial3DMixer.clipAction(clip); action.reset().play();
-        els.tutorialStatus.textContent='3D手本 再生中';
+        els.tutorialStatus.textContent='3D手本 再生中 • モデル表示OK';
       }else{
-        els.tutorialStatus.textContent='3Dモデル読み込み完了（アニメーションなし）';
+        els.tutorialStatus.textContent='3Dモデル読み込み完了 • アニメーションなし';
       }
     }catch(e){
       if(req!==tutorial3DRequest) return;
@@ -435,7 +501,7 @@ th:100%;height:auto;position:absolute;inset:0}
           const loader=new FBXLoader();
           const model=await new Promise((resolve,reject)=>loader.load(file,resolve,undefined,reject));
           if(req!==tutorial3DRequest) return;
-          tutorial3DModel=model; model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); tutorial3DScene.add(model); fitTutorialModel(model);
+          tutorial3DModel=model; prepareTutorialModel(model); model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); tutorial3DScene.add(model); fitTutorialModel(model); resizeModelTutorial();
           if(model.animations?.length){tutorial3DMixer=new THREE.AnimationMixer(model);tutorial3DMixer.clipAction(model.animations[0]).play();}
           els.tutorialStatus.textContent=`${file} を再生中`;
           fallbackLoaded=true; break;
@@ -450,11 +516,17 @@ th:100%;height:auto;position:absolute;inset:0}
   }
 
   async function openModelTutorial(){
-    await initModelTutorial();
+    // 重要: display:none の状態でWebGL canvasを初期化するとSafari/iPadでは
+    // canvasサイズが 0x0 / 1x1 のままになり、3Dモデルが「読み込めているのに見えない」
+    // 状態になりやすい。先にチュートリアルを表示してからWebGLを初期化する。
     tutorialIndex=0;
     els.modelTutorial.classList.add('show');
     els.modelTutorial.setAttribute('aria-hidden','false');
     if(els.startScreen) els.startScreen.style.display='none';
+
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await initModelTutorial();
+    resizeModelTutorial();
     loadTutorialStep(0);
   }
 
