@@ -2,30 +2,62 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>FBX Tutorial Simple Viewer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Migi FBX Tutorial Viewer</title>
 <style>
+:root{color-scheme:dark}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090c11;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;
+  background:#090c11;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
 #app{position:fixed;inset:0}
 canvas{display:block;width:100%;height:100%}
+
 #ui{
-  position:fixed;left:12px;right:12px;top:12px;z-index:10;
-  padding:10px;border:1px solid #2e3745;border-radius:14px;
-  background:rgba(8,11,16,.88);backdrop-filter:blur(10px)
+  position:fixed;left:12px;right:12px;top:12px;z-index:20;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  padding:10px;
+  border:1px solid #2e3745;
+  border-radius:14px;
+  background:rgba(8,11,16,.86);
+  backdrop-filter:blur(10px)
 }
-#buttons{display:flex;flex-wrap:wrap;gap:8px}
 button{
-  border:1px solid #3c4655;background:#1a222d;color:#fff;
-  border-radius:10px;padding:9px 12px;font-weight:700
+  font:inherit;
+  border:1px solid #3c4655;
+  background:#1a222d;
+  color:#fff;
+  border-radius:10px;
+  padding:9px 12px;
+  font-weight:700
 }
 button.active{background:#3478f6;border-color:#3478f6}
-#status{margin-top:9px;font-size:13px;color:#c8d0da}
-#log{
-  position:fixed;left:12px;right:12px;bottom:12px;z-index:10;
-  max-height:28vh;overflow:auto;white-space:pre-wrap;
-  padding:10px 12px;border:1px solid #2e3745;border-radius:12px;
-  background:rgba(8,11,16,.84);color:#aeb8c4;font-size:11px;line-height:1.45
+button:disabled{opacity:.45}
+
+#status{
+  flex:1;
+  min-width:260px;
+  font-size:13px;
+  color:#c8d0da
+}
+
+#details{
+  position:fixed;
+  left:12px;right:12px;bottom:12px;
+  z-index:20;
+  max-width:900px;
+  max-height:35vh;
+  overflow:auto;
+  white-space:pre-wrap;
+  padding:10px 12px;
+  border:1px solid #2e3745;
+  border-radius:12px;
+  background:rgba(8,11,16,.84);
+  color:#aeb8c4;
+  font-size:11px;
+  line-height:1.45
 }
 </style>
 </head>
@@ -34,42 +66,54 @@ button.active{background:#3478f6;border-color:#3478f6}
 <div id="app"></div>
 
 <div id="ui">
-  <div id="buttons"></div>
-  <div id="status">FBXを読み込みます…</div>
+  <button data-index="0">右ストレート</button>
+  <button data-index="1">右フック</button>
+  <button data-index="2">左ストレート</button>
+  <button data-index="3">左フック</button>
+  <button id="replay">↻ 再生し直す</button>
+  <button id="fit">中央に合わせる</button>
+  <div id="status">FBXを読み込み中…</div>
 </div>
 
-<div id="log">起動中…</div>
+<div id="details">起動中…</div>
 
 <script type="importmap">
 {
-  "imports":{
-    "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
   }
 }
 </script>
 
 <script type="module">
-import * as THREE from "three";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
 const app=document.getElementById("app");
-const buttonsEl=document.getElementById("buttons");
 const statusEl=document.getElementById("status");
-const logEl=document.getElementById("log");
+const detailsEl=document.getElementById("details");
+const replayEl=document.getElementById("replay");
+const fitEl=document.getElementById("fit");
+const buttons=[...document.querySelectorAll("#ui button[data-index]")];
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x090c11);
 
-const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.01,1000);
+const camera=new THREE.PerspectiveCamera(
+  40,
+  innerWidth/innerHeight,
+  0.01,
+  1000
+);
 camera.position.set(0,1.2,3.2);
 
 const renderer=new THREE.WebGLRenderer({
-  canvas:document.createElement("canvas"),
   antialias:true,
   alpha:false,
   powerPreference:"high-performance"
 });
+
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.setSize(innerWidth,innerHeight,false);
@@ -102,22 +146,31 @@ controls.maxDistance=30;
 controls.target.set(0,0,0);
 
 const FILES=[
-  {name:"右ストレート",file:"Migi_straight.fbx"},
-  {name:"右フック",file:"Migi_hook.fbx"},
-  {name:"左ストレート",file:"Hidari_staright.fbx",fallback:"Hidari_straight.fbx"},
-  {name:"左フック",file:"Hidari_hook.fbx"}
+  "Migi_straight.fbx",
+  "Migi_hook.fbx",
+  "Hidari_staright.fbx",
+  "Hidari_hook.fbx"
+];
+
+const FALLBACKS=[
+  [],
+  [],
+  ["Hidari_straight.fbx"],
+  []
 ];
 
 let model=null;
 let mixer=null;
-let clip=null;
-let loadedIndex=-1;
+let action=null;
+let currentClip=null;
+let currentIndex=-1;
+
 const clock=new THREE.Clock();
 
-function log(msg){
-  const line=`[${new Date().toLocaleTimeString()}] ${msg}`;
+function log(msg,kind="INFO"){
+  const line=`[${new Date().toLocaleTimeString()}][${kind}] ${msg}`;
   console.log(line);
-  logEl.textContent=line+"\n"+logEl.textContent;
+  detailsEl.textContent=(line+"\n"+detailsEl.textContent).slice(0,16000);
 }
 
 function status(msg,ok=false){
@@ -125,28 +178,34 @@ function status(msg,ok=false){
   statusEl.style.color=ok?"#7df0ad":"#c8d0da";
 }
 
-function cleanup(){
+function cleanupModel(){
   if(mixer){
     mixer.stopAllAction();
-    mixer=null;
   }
-  clip=null;
+
+  mixer=null;
+  action=null;
+  currentClip=null;
 
   if(!model)return;
 
   scene.remove(model);
 
   model.traverse(o=>{
-    if(o.geometry)o.geometry.dispose?.();
+    o.geometry?.dispose?.();
+
     if(o.material){
       const mats=Array.isArray(o.material)?o.material:[o.material];
-      mats.forEach(m=>{
-        if(!m)return;
+
+      for(const m of mats){
+        if(!m)continue;
+
         for(const v of Object.values(m)){
           if(v?.isTexture)v.dispose?.();
         }
+
         m.dispose?.();
-      });
+      }
     }
   });
 
@@ -154,8 +213,6 @@ function cleanup(){
 }
 
 function makeVisible(root){
-  root.visible=true;
-
   root.traverse(o=>{
     if(!o.isMesh)return;
 
@@ -166,6 +223,7 @@ function makeVisible(root){
 
     for(const m of mats){
       if(!m)continue;
+
       m.side=THREE.DoubleSide;
       m.transparent=false;
       m.opacity=1;
@@ -187,17 +245,14 @@ function fitModel(root){
   const size=box.getSize(new THREE.Vector3());
   const maxDim=Math.max(size.x,size.y,size.z);
 
-  if(!Number.isFinite(maxDim)||maxDim<=0){
-    throw new Error("FBXのサイズを取得できません。");
-  }
-
-  root.scale.setScalar(2/maxDim);
+  root.scale.setScalar(2.0/Math.max(maxDim,0.0001));
   root.updateMatrixWorld(true);
 
   const b=new THREE.Box3().setFromObject(root);
-  const center=b.getCenter(new THREE.Vector3());
+  const c=b.getCenter(new THREE.Vector3());
+  const s=b.getSize(new THREE.Vector3());
 
-  root.position.sub(center);
+  root.position.sub(c);
   root.updateMatrixWorld(true);
 
   const b2=new THREE.Box3().setFromObject(root);
@@ -205,172 +260,177 @@ function fitModel(root){
   root.updateMatrixWorld(true);
 
   const finalBox=new THREE.Box3().setFromObject(root);
-  const c=finalBox.getCenter(new THREE.Vector3());
-  const s=finalBox.getSize(new THREE.Vector3());
-  const radius=Math.max(s.x,s.y,s.z)*0.6;
+  const fc=finalBox.getCenter(new THREE.Vector3());
+  const fs=finalBox.getSize(new THREE.Vector3());
 
-  controls.target.copy(c);
+  const radius=Math.max(fs.x,fs.y,fs.z)*0.6;
+
+  controls.target.copy(fc);
 
   camera.position.set(
-    c.x+radius*.1,
-    c.y+radius*.45,
-    c.z+radius*2.8
+    fc.x+radius*.1,
+    fc.y+radius*.45,
+    fc.z+radius*2.8
   );
 
-  camera.lookAt(c);
+  camera.lookAt(fc);
   controls.update();
+
+  log(
+    `fit: size=[${fs.x.toFixed(3)},${fs.y.toFixed(3)},${fs.z.toFixed(3)}] center=[${fc.x.toFixed(3)},${fc.y.toFixed(3)},${fc.z.toFixed(3)}]`,
+    "OK"
+  );
 }
 
-function prepareModel(root){
-  makeVisible(root);
+function summarize(root){
+  let meshes=0;
+  let bones=0;
+  let skinned=0;
+  let materials=0;
 
   root.traverse(o=>{
-    if(!o.isMesh)return;
-
-    o.castShadow=true;
-    o.receiveShadow=true;
-
-    const mats=Array.isArray(o.material)?o.material:[o.material];
-
-    o.material=mats.map(m=>{
-      if(!m){
-        return new THREE.MeshStandardMaterial({
-          color:0xd7deea,
-          roughness:.72,
-          metalness:.05,
-          side:THREE.DoubleSide
-        });
-      }
-
-      const color=(m.color?.isColor)
-        ?m.color.clone()
-        :new THREE.Color(0xd7deea);
-
-      if(color.r+color.g+color.b<.1){
-        color.setHex(0xaeb9c9);
-      }
-
-      return new THREE.MeshStandardMaterial({
-        color,
-        map:m.map||null,
-        roughness:typeof m.roughness==="number"?Math.max(.45,Math.min(1,m.roughness)):.72,
-        metalness:typeof m.metalness==="number"?Math.min(.2,m.metalness):.03,
-        transparent:false,
-        opacity:1,
-        side:THREE.DoubleSide
-      });
-    });
-
-    o.frustumCulled=false;
+    if(o.isMesh)meshes++;
+    if(o.isBone)bones++;
+    if(o.isSkinnedMesh)skinned++;
+    if(o.material){
+      materials+=Array.isArray(o.material)?o.material.length:1;
+    }
   });
+
+  return `meshes=${meshes} bones=${bones} skinned=${skinned} materials=${materials} animations=${root.animations?.length||0}`;
 }
 
-async function fetchArrayBuffer(fileName){
-  const url="./"+encodeURIComponent(fileName).replace(/%2F/g,"/");
-
-  log(`fetch開始: ${url}`);
-
-  const response=await fetch(url,{
+async function readFBX(fileName){
+  const response=await fetch("./"+fileName,{
     cache:"no-store"
   });
 
   if(!response.ok){
-    throw new Error(`HTTP ${response.status} ${response.statusText} / ${url}`);
+    throw new Error(`HTTP ${response.status}: ${fileName}`);
   }
 
   const buffer=await response.arrayBuffer();
 
-  log(`ArrayBuffer取得: ${buffer.byteLength.toLocaleString()} bytes`);
-
   if(buffer.byteLength<16){
-    throw new Error("FBXファイルが小さすぎます。");
+    throw new Error(`ファイルが小さすぎます: ${fileName}`);
   }
+
+  log(
+    `${fileName}: bytes=${buffer.byteLength.toLocaleString()}`,
+    "INFO"
+  );
 
   return buffer;
 }
 
-async function loadFBX(index){
-  index=Math.max(0,Math.min(FILES.length-1,index));
-  const item=FILES[index];
+async function loadIndex(index){
+  currentIndex=index;
 
-  loadedIndex=index;
-
-  [...buttonsEl.children].forEach((b,i)=>{
+  buttons.forEach((b,i)=>{
     b.classList.toggle("active",i===index);
   });
 
-  cleanup();
+  cleanupModel();
 
-  status(`${item.file} を読み込み中…`);
-  log(`=== ${item.name} / ${item.file} ===`);
-
-  let buffer=null;
-  let actualFile=item.file;
+  let actualFile=FILES[index];
+  status(`${actualFile} を読み込み中…`);
 
   try{
-    buffer=await fetchArrayBuffer(item.file);
-  }catch(firstError){
-    log("最初のファイル取得失敗: "+firstError.message);
+    let buffer;
 
-    if(item.fallback){
-      log(`代替ファイルを試します: ${item.fallback}`);
-      buffer=await fetchArrayBuffer(item.fallback);
-      actualFile=item.fallback;
-    }else{
-      throw firstError;
+    try{
+      buffer=await readFBX(actualFile);
+    }catch(firstError){
+      const fb=FALLBACKS[index]?.[0];
+
+      if(!fb){
+        throw firstError;
+      }
+
+      log(`${actualFile} 取得失敗。代替名を試します: ${fb}`,"INFO");
+
+      actualFile=fb;
+      buffer=await readFBX(actualFile);
     }
+
+    // ここが動作確認済みViewerと同じ読み込み方式。
+    const obj=loader.parse(buffer.slice(0),"");
+
+    cleanupModel();
+
+    model=obj;
+
+    makeVisible(model);
+    scene.add(model);
+
+    log(`${actualFile}: ${summarize(model)}`,"OK");
+
+    // モデル表示を先に確定
+    fitModel(model);
+
+    // アニメーションを再生
+    if(model.animations?.length){
+      mixer=new THREE.AnimationMixer(model);
+      currentClip=model.animations[0];
+
+      action=mixer.clipAction(currentClip);
+      action.reset().play();
+
+      status(
+        `${actualFile} / 読み込み成功 / 表示OK / 再生中`,
+        true
+      );
+
+      log(
+        `animation[0]: ${currentClip.name||"Animation 0"} duration=${currentClip.duration.toFixed(3)}s`,
+        "OK"
+      );
+    }else{
+      status(
+        `${actualFile} / 読み込み成功 / 表示OK / アニメーションなし`,
+        true
+      );
+
+      log("アニメーションなし","INFO");
+    }
+
+    replayEl.disabled=!mixer;
+    fitEl.disabled=!model;
+
+  }catch(err){
+    cleanupModel();
+
+    const msg=err?.stack||err?.message||String(err);
+
+    status(`${actualFile} / 読み込み失敗`,false);
+    log(msg,"ERROR");
+
+    replayEl.disabled=true;
+    fitEl.disabled=true;
   }
-
-  // 動作確認できたViewerと同じ方式:
-  // File/URLそのものをFBXLoaderに渡さずArrayBufferをparseする。
-  log("FBXLoader.parse() 開始");
-
-  const obj=loader.parse(buffer.slice(0),"");
-
-  log(`parse OK / meshes=${countType(obj,"mesh")} bones=${countType(obj,"bone")} skinned=${countType(obj,"skinned")}`);
-
-  prepareModel(obj);
-  scene.add(obj);
-
-  model=obj;
-
-  fitModel(model);
-
-  if(Array.isArray(model.animations)&&model.animations.length){
-    mixer=new THREE.AnimationMixer(model);
-    clip=model.animations[0];
-
-    const action=mixer.clipAction(clip);
-    action.reset();
-    action.setLoop(THREE.LoopRepeat,Infinity);
-    action.play();
-
-    status(`${actualFile} / 表示OK / 再生中`,true);
-    log(`アニメーション再生: ${clip.name||"Animation 0"}`);
-  }else{
-    status(`${actualFile} / 表示OK / アニメーションなし`,true);
-    log("アニメーションはありません。");
-  }
 }
 
-function countType(root,type){
-  let n=0;
-  root.traverse(o=>{
-    if(
-      (type==="mesh"&&o.isMesh)||
-      (type==="bone"&&o.isBone)||
-      (type==="skinned"&&o.isSkinnedMesh)
-    )n++;
-  });
-  return n;
-}
+buttons.forEach((b,i)=>{
+  b.addEventListener("click",()=>loadIndex(i));
+});
 
-for(let i=0;i<FILES.length;i++){
-  const b=document.createElement("button");
-  b.textContent=FILES[i].name;
-  b.addEventListener("click",()=>loadFBX(i));
-  buttonsEl.appendChild(b);
-}
+replayEl.addEventListener("click",()=>{
+  if(!mixer||!currentClip)return;
+
+  mixer.stopAllAction();
+
+  action=mixer.clipAction(currentClip);
+  action.reset().play();
+
+  log(
+    `再生し直し: ${currentClip.name||"Animation 0"}`,
+    "OK"
+  );
+});
+
+fitEl.addEventListener("click",()=>{
+  if(model)fitModel(model);
+});
 
 window.addEventListener("resize",()=>{
   camera.aspect=innerWidth/innerHeight;
@@ -380,15 +440,16 @@ window.addEventListener("resize",()=>{
 
 renderer.domElement.addEventListener("webglcontextlost",e=>{
   e.preventDefault();
-  log("WebGL context lost");
+  log("WebGL context lost","ERROR");
 });
 
 renderer.domElement.addEventListener("webglcontextrestored",()=>{
-  log("WebGL context restored");
+  log("WebGL context restored","OK");
 });
 
 function animate(){
   requestAnimationFrame(animate);
+
   mixer?.update(clock.getDelta());
   controls.update();
   renderer.render(scene,camera);
@@ -396,15 +457,11 @@ function animate(){
 
 animate();
 
-log("起動完了");
-log("同じフォルダのFBXを自動読み込みします。");
+log("起動完了。","OK");
+log("同じフォルダのFBXをfetch → ArrayBuffer → FBXLoader.parse()します。","OK");
 
-// 起動時に右ストレートを自動表示
-loadFBX(0).catch(e=>{
-  console.error(e);
-  status("右ストレートの読み込みに失敗");
-  log("ERROR: "+(e?.stack||e?.message||String(e)));
-});
+// 最初から右ストレートを表示
+loadIndex(0);
 </script>
 </body>
 </html>
