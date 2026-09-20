@@ -95,12 +95,116 @@ th:100%;height:auto;position:absolute;inset:0}
   .tutorial-controls button{min-width:110px}
   .tutorial-controls .primary{min-width:170px}
   .tutorial-note{font-size:11px;color:#77859a}
-  .tutorial-arrow{position:absolute;left:50%;top:47%;width:120px;height:220px;transform:translate(-50%,-50%);opacity:.9;pointer-events:none;display:none}
+  .tutorial-arrow{display:none}
   .tutorial-arrow.show{display:block}
   .tutorial-arrow::before{content:"";position:absolute;left:50%;top:36px;bottom:0;width:14px;transform:translateX(-50%);border-radius:20px;background:linear-gradient(180deg,#ffde65,#ff8d4d)}
   .tutorial-arrow::after{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:52px solid #ffde65;filter:drop-shadow(0 0 14px rgba(255,204,86,.35))}
   @media(max-width:700px){.tutorial-shell{padding:10px}.tutorial-stage{border-radius:18px}.tutorial-desc{font-size:12px}.tutorial-controls{flex-wrap:wrap}.tutorial-controls-left,.tutorial-controls-right{width:100%}.tutorial-controls button{flex:1}.tutorial-controls .primary{width:100%}.tutorial-note{width:100%;order:3}}
 
+
+  .stage-select{
+    position:fixed;inset:0;z-index:130;display:none;
+    background:
+      radial-gradient(circle at 50% 18%,rgba(52,120,246,.20),transparent 34%),
+      radial-gradient(circle at 85% 85%,rgba(183,79,255,.10),transparent 30%),
+      linear-gradient(180deg,#060912,#03050a 68%,#020307);
+    color:#fff
+  }
+  .stage-select.show{display:flex;align-items:center;justify-content:center;padding:18px}
+  .stage-select-shell{
+    width:min(1060px,100%);max-height:94vh;overflow:auto;
+    padding:24px;border:1px solid #2f3b4e;border-radius:26px;
+    background:rgba(8,12,19,.92);
+    box-shadow:0 28px 100px rgba(0,0,0,.58)
+  }
+  .stage-select-top{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    margin-bottom:18px
+  }
+  .stage-select-kicker{
+    font-size:11px;font-weight:950;letter-spacing:.24em;color:#72a9ff
+  }
+  .stage-select-title{
+    margin:5px 0 0;font-size:clamp(32px,6vw,58px);
+    line-height:.95;font-weight:950;letter-spacing:-.04em
+  }
+  .stage-select-sub{
+    margin:9px 0 0;color:#9eabba;font-size:13px;line-height:1.6
+  }
+  .stage-select-status{
+    min-width:170px;padding:11px 13px;border:1px solid #303b4d;
+    border-radius:14px;background:#0b111a;text-align:right
+  }
+  .stage-select-status span{
+    display:block;color:#7f8da1;font-size:10px;letter-spacing:.12em;font-weight:900
+  }
+  .stage-select-status b{display:block;margin-top:2px;font-size:20px}
+  .stage-grid{
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px
+  }
+  .stage-card{
+    position:relative;min-height:146px;padding:15px;text-align:left;
+    border:1px solid #2a3443;border-radius:17px;
+    background:linear-gradient(180deg,#111824,#0a0f16);
+    color:#fff;overflow:hidden;cursor:pointer;
+    transition:transform .12s,border-color .12s,background .12s,box-shadow .12s
+  }
+  .stage-card::after{
+    content:"";position:absolute;right:-22px;bottom:-28px;
+    width:100px;height:100px;border-radius:50%;
+    background:radial-gradient(circle,rgba(80,150,255,.15),transparent 68%);
+    pointer-events:none
+  }
+  .stage-card:hover{
+    transform:translateY(-2px);border-color:#4d8cff;
+    background:linear-gradient(180deg,#142038,#0b111a);
+    box-shadow:0 12px 30px rgba(0,0,0,.28)
+  }
+  .stage-card-num{
+    font-size:11px;font-weight:950;letter-spacing:.18em;color:#75aaff
+  }
+  .stage-card-name{
+    margin-top:8px;font-size:18px;font-weight:950
+  }
+  .stage-card-desc{
+    margin-top:6px;min-height:35px;color:#8f9bad;font-size:11px;line-height:1.45
+  }
+  .stage-meter{
+    display:flex;gap:4px;margin-top:12px
+  }
+  .stage-meter i{
+    flex:1;height:5px;border-radius:99px;background:#252e3c
+  }
+  .stage-meter i.on{background:#4d8cff}
+  .stage-card-tag{
+    margin-top:10px;display:inline-flex;padding:5px 8px;border:1px solid #2d394a;
+    border-radius:999px;color:#c9d6e8;font-size:10px;font-weight:900
+  }
+  .stage-select-bottom{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-top:17px;padding-top:15px;border-top:1px solid #222c39
+  }
+  .stage-select-note{color:#78869a;font-size:11px;line-height:1.5}
+  .stage-back{
+    min-width:120px;background:#151c27;border-color:#303b4a
+  }
+  .stage-hud-label{
+    margin:0 0 5px;text-align:center;
+    color:#7fc2ff;font-size:10px;letter-spacing:.18em;font-weight:950
+  }
+  @media(max-width:900px){
+    .stage-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  @media(max-width:620px){
+    .stage-select-shell{padding:17px;border-radius:20px}
+    .stage-select-top{align-items:flex-start;flex-direction:column}
+    .stage-select-status{width:100%;text-align:left}
+    .stage-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .stage-card{min-height:136px;padding:12px}
+    .stage-card-name{font-size:16px}
+    .stage-select-bottom{align-items:stretch;flex-direction:column}
+    .stage-back{width:100%}
+  }
 </style>
 </head>
 <body>
@@ -108,7 +212,7 @@ th:100%;height:auto;position:absolute;inset:0}
   <div class="start-panel">
     <div class="start-kicker">CAMERA MOTION BATTLE</div>
     <h1 class="start-title">PUNCH<br>ARENA</h1>
-    <div class="start-sub">手本の3Dモデルで動きを確認してから、あなた専用のパンチ判定を学習。学習後はパンチと回避でモンスターと戦います。</div>
+    <div class="start-sub">手本の3Dモデルで動きを確認してから、あなた専用のパンチ判定を学習。チュートリアル後は10ステージから選んで、パンチと回避でモンスターと戦います。</div>
     <div class="start-features">
       <div class="start-feature"><b>🥊 パンチ</b><span>5種類の動きを最初に学習。あなたのパンチに合わせて判定します。</span></div>
       <div class="start-feature"><b>⚠ 危険攻撃</b><span>赤い予告を見て、胸の⭕を危険ラインから外してください。</span></div>
@@ -118,6 +222,33 @@ th:100%;height:auto;position:absolute;inset:0}
     <div class="start-note">初回のみカメラ許可とパンチ学習が必要です</div>
   </div>
 
+</div>
+
+
+<div id="stageSelect" class="stage-select" aria-hidden="true">
+  <div class="stage-select-shell">
+    <div class="stage-select-top">
+      <div>
+        <div class="stage-select-kicker">PUNCH ARENA • BATTLE SELECT</div>
+        <h2 class="stage-select-title">STAGE SELECT</h2>
+        <div class="stage-select-sub">挑戦するステージを選択してください。後半ステージほど敵が速く、攻撃が強くなります。</div>
+      </div>
+      <div class="stage-select-status">
+        <span>SELECTED</span>
+        <b id="stageSelectValue">STAGE 01</b>
+      </div>
+    </div>
+
+    <div id="stageGrid" class="stage-grid"></div>
+
+    <div class="stage-select-bottom">
+      <div class="stage-select-note">
+        初回はステージ選択後にカメラを開始し、5種類のパンチ学習を行います。<br>
+        学習済みなら、そのまま選択ステージの戦闘へ進みます。
+      </div>
+      <button id="stageSelectBack" class="stage-back" type="button">← 戻る</button>
+    </div>
+  </div>
 </div>
 
 <div id="modelTutorial" class="model-tutorial" aria-hidden="true">
@@ -146,7 +277,7 @@ th:100%;height:auto;position:absolute;inset:0}
         <button id="tutorialNext" type="button">次へ →</button>
       </div>
       <div class="tutorial-controls-right">
-        <div id="tutorialNote" class="tutorial-note">4つのFBX手本を確認したあと、実際のパンチ学習に進みます。</div>
+        <div id="tutorialNote" class="tutorial-note">5つのFBX手本を確認したあと、ステージを選んで実戦へ進みます。</div>
         <button id="tutorialPractice" class="primary" type="button">手本を見終えたら実践へ</button>
       </div>
     </div>
@@ -165,6 +296,7 @@ th:100%;height:auto;position:absolute;inset:0}
       <div id="poseStatus" class="pill" style="display:none">姿勢未検出</div>
     </div>
     <div class="battle-hud">
+      <div id="stageLabel" class="stage-hud-label">STAGE 01</div>
       <div class="battle-name"><span id="monsterName">モンスター</span></div>
       <div class="monster-hpbar"><i id="monsterHpBar"></i></div>
       <div id="monsterHelp" class="battle-help">パンチで攻撃！</div>
@@ -215,9 +347,11 @@ th:100%;height:auto;position:absolute;inset:0}
   window._threeReady = (async () => {
     const THREE = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js");
     const { FBXLoader } = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js");
+    const { OrbitControls } = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js");
     window.THREE = THREE;
     window.FBXLoader = FBXLoader;
-    return { THREE, FBXLoader };
+    window.OrbitControls = OrbitControls;
+    return { THREE, FBXLoader, OrbitControls };
   })().catch(err => {
     console.error("Three.js / FBXLoader initialization failed:", err);
     throw err;
@@ -270,7 +404,12 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorialReplay: document.getElementById("tutorialReplay"),
     tutorialPractice: document.getElementById("tutorialPractice"),
     tutorialClose: document.getElementById("tutorialClose"),
-    tutorialUpperArrow: document.getElementById("tutorialUpperArrow")
+    tutorialUpperArrow: document.getElementById("tutorialUpperArrow"),
+    stageSelect: document.getElementById("stageSelect"),
+    stageGrid: document.getElementById("stageGrid"),
+    stageSelectValue: document.getElementById("stageSelectValue"),
+    stageSelectBack: document.getElementById("stageSelectBack"),
+    stageLabel: document.getElementById("stageLabel")
   };
 
   let stream = null, running = false, raf = 0;
@@ -312,10 +451,91 @@ th:100%;height:auto;position:absolute;inset:0}
   let tutorial3DScene = null;
   let tutorial3DClock = null;
   let tutorial3DMixer = null;
+  let tutorial3DControls = null;
   let tutorial3DModel = null;
   let tutorialIndex = 0;
   let tutorialLoaded = false;
   let tutorialLoadToken = 0;
+
+
+  const STAGES = [
+    {id:1,name:'駆け出し',desc:'まずは基本を叩き込む',hp:100,damage:12,speed:1.00,tag:'BEGINNER'},
+    {id:2,name:'反撃訓練',desc:'攻撃間隔が少し短くなる',hp:115,damage:14,speed:1.04,tag:'EASY'},
+    {id:3,name:'加速戦',desc:'敵の攻撃が一段速くなる',hp:130,damage:16,speed:1.08,tag:'NORMAL'},
+    {id:4,name:'乱撃戦',desc:'重い一撃に注意',hp:145,damage:18,speed:1.12,tag:'NORMAL+'},
+    {id:5,name:'中盤試練',desc:'ここから本番',hp:165,damage:20,speed:1.16,tag:'HARD'},
+    {id:6,name:'高速戦',desc:'予告を見て即回避',hp:185,damage:22,speed:1.20,tag:'HARD+'},
+    {id:7,name:'極限回避',desc:'休む暇がない',hp:210,damage:24,speed:1.25,tag:'VERY HARD'},
+    {id:8,name:'修羅場',desc:'重攻撃と高速化',hp:235,damage:26,speed:1.30,tag:'EXTREME'},
+    {id:9,name:'鬼門',desc:'一瞬の判断が勝負',hp:260,damage:28,speed:1.36,tag:'EXTREME+'},
+    {id:10,name:'LAST ARENA',desc:'最終ステージ',hp:300,damage:32,speed:1.43,tag:'FINAL'}
+  ];
+
+  let selectedStage = 1;
+
+  function currentStageConfig(){
+    return STAGES[Math.max(0,Math.min(STAGES.length-1,selectedStage-1))];
+  }
+
+  function updateStageHUD(){
+    const s=currentStageConfig();
+    const text=`STAGE ${String(s.id).padStart(2,'0')}`;
+    if(els.stageLabel) els.stageLabel.textContent=text;
+    if(els.stageSelectValue) els.stageSelectValue.textContent=text;
+  }
+
+  function renderStageSelect(){
+    if(!els.stageGrid) return;
+    els.stageGrid.innerHTML='';
+
+    for(const s of STAGES){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='stage-card';
+      b.setAttribute('aria-label',`ステージ${s.id} ${s.name}`);
+
+      const meter=Array.from({length:10},(_,i)=>
+        `<i class="${i<s.id?'on':''}"></i>`
+      ).join('');
+
+      b.innerHTML=`
+        <div class="stage-card-num">STAGE ${String(s.id).padStart(2,'0')}</div>
+        <div class="stage-card-name">${s.name}</div>
+        <div class="stage-card-desc">${s.desc}</div>
+        <div class="stage-meter">${meter}</div>
+        <div class="stage-card-tag">${s.tag}</div>
+      `;
+
+      b.addEventListener('click',()=>{
+        selectedStage=s.id;
+        updateStageHUD();
+        openSelectedStage();
+      });
+
+      els.stageGrid.appendChild(b);
+    }
+
+    updateStageHUD();
+  }
+
+  function openStageSelect(){
+    closeModelTutorial();
+    renderStageSelect();
+    els.stageSelect.classList.add('show');
+    els.stageSelect.setAttribute('aria-hidden','false');
+    updateStageHUD();
+    if(els.startScreen) els.startScreen.style.display='none';
+  }
+
+  function closeStageSelect(){
+    els.stageSelect.classList.remove('show');
+    els.stageSelect.setAttribute('aria-hidden','true');
+  }
+
+  function openSelectedStage(){
+    closeStageSelect();
+    startCameraAndGame(false);
+  }
 
   const MODEL_TUTORIALS = [
     {
@@ -375,6 +595,15 @@ th:100%;height:auto;position:absolute;inset:0}
 
     tutorial3DCamera = new THREE.PerspectiveCamera(40,1,0.01,1000);
     tutorial3DCamera.position.set(0,1.2,3.2);
+
+    tutorial3DControls = new OrbitControls(tutorial3DCamera,els.tutorial3d);
+    tutorial3DControls.enableDamping=true;
+    tutorial3DControls.enablePan=false;
+    tutorial3DControls.minDistance=.25;
+    tutorial3DControls.maxDistance=12;
+    tutorial3DControls.target.set(0,0,0);
+    tutorial3DControls.rotateSpeed=.65;
+    tutorial3DControls.zoomSpeed=.8;
 
     tutorial3DRenderer = new THREE.WebGLRenderer({
       canvas:els.tutorial3d,
@@ -535,6 +764,10 @@ th:100%;height:auto;position:absolute;inset:0}
     tutorial3DCamera.near=0.01;
     tutorial3DCamera.far=1000;
     tutorial3DCamera.lookAt(finalCenter);
+    if(tutorial3DControls){
+      tutorial3DControls.target.copy(finalCenter);
+      tutorial3DControls.update();
+    }
     tutorial3DCamera.updateProjectionMatrix();
   }
 
@@ -665,7 +898,7 @@ th:100%;height:auto;position:absolute;inset:0}
 
   function completeModelTutorial(){
     closeModelTutorial();
-    startCameraAndGame(true);
+    openStageSelect();
   }
 
   function modelTutorialLoop(){
@@ -679,11 +912,8 @@ th:100%;height:auto;position:absolute;inset:0}
       tutorial3DMixer.update(dt);
     }
 
-    // アニメーションを見やすくするためのゆっくりした回転。
-    // FBXのアニメーション自体には手を加えない。
-    if(tutorial3DModel){
-      tutorial3DModel.rotation.y+=dt*0.18;
-    }
+    // 3D見本は自動回転させず、指・マウスで自由に回転できる。
+    tutorial3DControls?.update();
 
     tutorial3DRenderer.render(tutorial3DScene,tutorial3DCamera);
   }
@@ -1498,7 +1728,8 @@ th:100%;height:auto;position:absolute;inset:0}
 
   function spawnMonster(){
     const k=monsterKinds[Math.floor(Math.random()*monsterKinds.length)];
-    monster.hp=monster.maxHp=100;
+    const stage=currentStageConfig();
+    monster.hp=monster.maxHp=stage.hp;
     monster.name=k.name;
     monster.kind=monsterKinds.indexOf(k);
     monster.hitFlash=0; monster.shake=0; monster.defeated=false; monster.defeatT=0;
@@ -1631,7 +1862,9 @@ th:100%;height:auto;position:absolute;inset:0}
 
   function difficultyFactor(now){
     const elapsed=Math.max(0,now-(enemyAttack.gameStartT||now));
-    return clamp(elapsed/90000,0,1);
+    const timeDifficulty=clamp(elapsed/90000,0,1);
+    const stageDifficulty=(Math.max(1,selectedStage)-1)/9;
+    return clamp(timeDifficulty*0.62+stageDifficulty*0.38,0,1);
   }
 
   function beginEnemyAttack(now){
@@ -1645,7 +1878,16 @@ th:100%;height:auto;position:absolute;inset:0}
     enemyAttack.hit=false;
     enemyAttack.activeStep=0;
     enemyAttack.difficulty=d;
-    enemyAttack.sweepDuration=Math.max(420,Math.round((pick.type==='double'||pick.type==='fan'||pick.type==='cornerStrike'?760:820)*(1-d*0.34)));
+    const stage=currentStageConfig();
+    enemyAttack.damage=stage.damage;
+    enemyAttack.sweepDuration=Math.max(
+      320,
+      Math.round(
+        (pick.type==='double'||pick.type==='fan'||pick.type==='cornerStrike'?760:820)
+        * (1-d*0.34)
+        / stage.speed
+      )
+    );
     enemyAttack.label=pick.name;
     enemyAttack.state='warning';
     enemyAttack.attacksStarted++;
@@ -1826,7 +2068,11 @@ th:100%;height:auto;position:absolute;inset:0}
         enemyAttack.state='idle';
         // 同じパターン連続禁止。難易度に応じて次の間隔を短くする。
         const d=enemyAttack.difficulty;
-        const rest=Math.max(100,Math.round(1500-d*850+Math.random()*650));
+        const stage=currentStageConfig();
+        const rest=Math.max(
+          80,
+          Math.round((1500-d*850+Math.random()*650)/stage.speed)
+        );
         enemyAttack.nextAttackT=now+rest;
       }
     }
@@ -2145,8 +2391,14 @@ th:100%;height:auto;position:absolute;inset:0}
       }
       chestMarker=null; chestMarkerVelocity={x:0,y:0}; chestMarkerLastT=0;
       resetPlayer();
-      enemyAttack.state="idle"; enemyAttack.gameStartT=performance.now(); enemyAttack.attacksStarted=0; enemyAttack.lastPatternId=-1; enemyAttack.nextAttackT=performance.now()+2600;
-      if(monster.hp<=0 || monster.defeated) spawnMonster();
+      updateStageHUD();
+      enemyAttack.state="idle";
+      enemyAttack.gameStartT=performance.now();
+      enemyAttack.attacksStarted=0;
+      enemyAttack.lastPatternId=-1;
+      enemyAttack.damage=currentStageConfig().damage;
+      enemyAttack.nextAttackT=performance.now()+Math.max(1800,Math.round(2600/currentStageConfig().speed));
+      spawnMonster();
       loop();
     }catch(e){
       console.error(e);
@@ -2161,7 +2413,7 @@ th:100%;height:auto;position:absolute;inset:0}
     if(!saved){
       openModelTutorial();
     }else{
-      startCameraAndGame(false);
+      openStageSelect();
     }
   }
 
@@ -2215,14 +2467,25 @@ th:100%;height:auto;position:absolute;inset:0}
 
   els.start.addEventListener("click",start);
   els.startGame.addEventListener("click",()=>{ void start(); });
-  els.exitGame.addEventListener("click",()=>{ stop(); els.startScreen.style.display="flex"; });
+  els.exitGame.addEventListener("click",()=>{
+    stop();
+    closeStageSelect();
+    els.startScreen.style.display="flex";
+  });
   els.stop.addEventListener("click",stop);
   els.calUseSelected.addEventListener("click",()=>saveSelectedCalibration(performance.now()));
   els.tutorialPrev.addEventListener('click',()=>loadTutorialStep(tutorialIndex-1));
   els.tutorialNext.addEventListener('click',()=>loadTutorialStep(tutorialIndex+1));
   els.tutorialReplay.addEventListener('click',()=>loadTutorialStep(tutorialIndex));
   els.tutorialPractice.addEventListener('click',()=>completeModelTutorial());
-  els.tutorialClose.addEventListener('click',()=>{closeModelTutorial(); els.startScreen.style.display='flex';});
+  els.tutorialClose.addEventListener('click',()=>{
+    closeModelTutorial();
+    els.startScreen.style.display='flex';
+  });
+  els.stageSelectBack.addEventListener('click',()=>{
+    closeStageSelect();
+    els.startScreen.style.display='flex';
+  });
   window.addEventListener('resize',resizeModelTutorial);
   window.addEventListener("beforeunload",stop);
 })();
